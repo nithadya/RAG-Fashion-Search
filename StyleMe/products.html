@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - StyleMe</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/products.css">
+</head>
+<body>
+    <!-- Navbar (same as index.html) -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">StyleMe</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="products.html">Products</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu" id="categoriesMenu">
+                            <!-- Dynamically loaded from API -->
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <div class="input-group me-3">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
+                        <button class="btn btn-primary" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="dropdown">
+                        <a href="#" class="btn btn-outline-secondary dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li id="authLinks">
+                                <a class="dropdown-item" href="login.html">Login</a>
+                                <a class="dropdown-item" href="register.html">Register</a>
+                            </li>
+                            <li id="userLinks" style="display: none;">
+                                <a class="dropdown-item" href="profile.html">Profile</a>
+                                <a class="dropdown-item" href="cart.html">Cart</a>
+                                <a class="dropdown-item" href="#" id="logoutBtn">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="cart.html" class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge bg-danger" id="cartCount">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Listing Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Filters Sidebar -->
+                <div class="col-lg-3 filter-sidebar">
+                    <div class="filter-card">
+                        <h6 class="filter-title">Categories</h6>
+                        <div id="categoryFilters">
+                            <!-- Dynamically loaded from API -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Price Range</h6>
+                        <div class="mb-3">
+                            <label for="minPrice" class="form-label">Min (Rs.)</label>
+                            <input type="number" class="form-control" id="minPrice" min="0" placeholder="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxPrice" class="form-label">Max (Rs.)</label>
+                            <input type="number" class="form-control" id="maxPrice" min="0" placeholder="10000">
+                        </div>
+                        <button class="btn btn-sm btn-primary w-100" id="applyPriceFilter">Apply</button>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Brand</h6>
+                        <div id="brandFilters">
+                            <!-- Dynamically loaded from API -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Size</h6>
+                        <div id="sizeFilters">
+                            <!-- Dynamically loaded from API -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Color</h6>
+                        <div id="colorFilters">
+                            <!-- Dynamically loaded from API -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Occasion</h6>
+                        <div id="occasionFilters">
+                            <!-- Dynamically loaded from API -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-card">
+                        <h6 class="filter-title">Gender</h6>
+                        <div class="form-check">
+                            <input class="form-check-input gender-filter" type="radio" name="gender" id="genderAll" value="" checked>
+                            <label class="form-check-label" for="genderAll">All</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input gender-filter" type="radio" name="gender" id="genderMale" value="Male">
+                            <label class="form-check-label" for="genderMale">Male</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input gender-filter" type="radio" name="gender" id="genderFemale" value="Female">
+                            <label class="form-check-label" for="genderFemale">Female</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input gender-filter" type="radio" name="gender" id="genderUnisex" value="Unisex">
+                            <label class="form-check-label" for="genderUnisex">Unisex</label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline-danger w-100 mt-3" id="resetFilters">Reset All Filters</button>
+                </div>
+                
+                <!-- Product Listing -->
+                <div class="col-lg-9">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 id="productListingTitle">All Products</h4>
+                        <div class="d-flex">
+                            <div class="dropdown me-2">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                    Sort By
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="name_asc">Name (A-Z)</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="name_desc">Name (Z-A)</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="price_asc">Price (Low to High)</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="price_desc">Price (High to Low)</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="newest">Newest First</a></li>
+                                    <li><a class="dropdown-item sort-option" href="#" data-sort="discount">Best Discount</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary view-option active" data-view="grid">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary view-option" data-view="list">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="productList">
+                        <!-- Products will be loaded here -->
+                    </div>
+                    
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <!-- Pagination will be loaded here -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/products.js"></script>
+</body>
+</html>

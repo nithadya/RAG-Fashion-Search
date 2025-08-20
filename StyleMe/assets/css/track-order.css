@@ -1,0 +1,94 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --success-color: #48bb78;
+    --warning-color: #ed8936;
+    --text-dark: #2d3748;
+    --text-light: #a0aec0;
+    --white: #ffffff;
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.tracking-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.tracking-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.tracking-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #e2e8f0;
+    border: 3px solid var(--white);
+    box-shadow: 0 0 0 3px #e2e8f0;
+}
+
+.timeline-item.completed::before {
+    background: var(--success-color);
+    box-shadow: 0 0 0 3px var(--success-color);
+}
+
+.timeline-item.current::before {
+    background: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.timeline-content {
+    background: var(--white);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-left: 1rem;
+}
+
+.timeline-item.completed .timeline-content {
+    border-color: var(--success-color);
+    background: rgba(72, 187, 120, 0.05);
+}
+
+.timeline-item.current .timeline-content {
+    border-color: var(--primary-color);
+    background: rgba(102, 126, 234, 0.05);
+}

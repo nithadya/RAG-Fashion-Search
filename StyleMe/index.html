@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleMe- Sri Lanka's Premier Online Fashion Store</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary-color: #718096;
+            --accent-color: #f093fb;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --text-dark: #2d3748;
+            --text-light: #a0aec0;
+            --bg-light: #f7fafc;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Enhanced Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-dark) !important;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.75rem 1rem !important;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-input {
+            border: 2px solid transparent;
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            background: var(--bg-light);
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-btn {
+            border-radius: 20px;
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        
+        /* User Dropdown Enhancement */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .user-avatar:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .dropdown-menu {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-xl);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            background: none;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        
+        /* Cart Button Enhancement */
+        .cart-btn {
+            position: relative;
+            border-radius: 20px;
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.5rem 1rem;
+            color: var(--white);
+            transition: var(--transition);
+        }
+        
+        .cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+            color: var(--white);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--error-color);
+            color: var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Hero Section Enhancement */
+        .hero-section {
+     background: url('assets/images/Clothing.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: var(--white);
+    padding: 120px 0;
+    margin-bottom: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .hero-search {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .hero-search .input-group {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .hero-search .form-control {
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            background: var(--white);
+        }
+        
+        .hero-search .btn {
+            border: none;
+            padding: 1rem 2rem;
+            background: var(--primary-gradient);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .hero-search .btn:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .view-all-btn {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .view-all-btn:hover {
+            background: var(--primary-gradient);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        /* Enhanced Product Cards */
+        .product-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+            border: none;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 0%, rgba(102, 126, 234, 0.05) 100%);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+        
+        .product-card:hover::before {
+            opacity: 1;
+        }
+        
+        .product-img {
+            height: 250px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .product-card:hover .product-img {
+            transform: scale(1.05);
+        }
+        
+        .product-body {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .product-title:hover {
+            color: var(--primary-color);
+        }
+        
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .product-price-original {
+            text-decoration: line-through;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-left: 0.5rem;
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--error-color);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 3;
+        }
+        
+        .add-to-cart-btn {
+            background: var(--primary-gradient);
+            border: none;
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            color: var(--white);
+        }
+        
+        .add-to-cart-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        .add-to-cart-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Category Cards */
+        .category-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .category-card:hover {
+            transform: scale(1.03);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .category-card img {
+            transition: var(--transition);
+        }
+        
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+        
+        .category-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: var(--white);
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+        }
+        
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Features Section */
+        .features-section {
+            background: var(--white);
+            padding: 80px 0;
+            margin: 80px 0;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2rem;
+            transition: var(--transition);
+        }
+        
+        .feature-item:hover .feature-icon {
+            transform: scale(1.1);
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .feature-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        
+        /* Enhanced Chatbot */
+        .chatbot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            z-index: 1040;
+            transition: var(--transition);
+            border: none;
+        }
+        
+        .chatbot-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+             width: 400px;
+            max-height: 650px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid var(--primary-color);
+
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            z-index: 1040;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .chatbot-controls {
+    display: flex;
+    gap: 0.25rem;
+}
+
+
+.chatbot-controls .btn {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+
+
+        
+        .chatbot-header {
+            background: var(--primary-gradient);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .chatbot-messages {
+            padding: 1rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: 300px;
+        }
+        
+        .chatbot-input {
+            padding: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            max-width: 90%;
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .fade-in {
+    animation: fadeInUp 0.4s ease;
+}
+
+
+.message-content {
+    padding: 1rem;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.user-message .message-content {
+    background: var(--primary-gradient);
+    color: var(--white);
+    border-bottom-right-radius: 6px;
+    margin-left: auto;
+}
+
+.bot-message .message-content {
+    background: var(--white);
+    color: var(--text-dark);
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.confidence-indicator {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+/* Enhanced Typing Indicator */
+.ai-typing-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    animation: typingDots 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.typing-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+@keyframes typingDots {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+/* AI Product Cards */
+.ai-product-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.ai-product-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.ai-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+    position: relative;
+    height: 120px;
+    overflow: hidden;
+}
+
+.ai-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.discount-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--error-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.ai-product-info {
+    padding: 0.75rem;
+}
+
+.ai-product-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.ai-product-category {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.ai-product-price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.original-price {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-decoration: line-through;
+    margin-left: 0.5rem;
+    font-weight: 400;
+}
+
+.ai-product-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.ai-product-actions .btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    flex: 1;
+}
+
+/* AI Category Cards */
+.ai-category-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.ai-category-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    text-align: center;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.ai-category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.ai-category-image {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+}
+
+.ai-category-info {
+    padding: 0.75rem;
+}
+
+.ai-category-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-dark);
+}
+
+.ai-category-count {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+/* AI Suggestions */
+.ai-suggestions {
+    border-top: 1px solid rgba(102, 126, 234, 0.1);
+    padding-top: 0.75rem;
+}
+
+.suggestions-label {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.suggestions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.chat-suggestion {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 15px;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.chat-suggestion:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-1px);
+}
+
+/* Voice Input Button */
+.voice-btn {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .chatbot-container {
+        width: 95%;
+        right: 2.5%;
+        max-height: 70vh;
+    }
+    
+    .ai-product-cards {
+        grid-template-columns: 1fr;
+        max-height: 300px;
+    }
+    
+    .ai-category-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+        
+        .bot-message {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background: var(--primary-gradient);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+        
+        /* Footer Enhancement */
+        .footer {
+            background: linear-gradient(135deg, var(--text-dark) 0%, #1a202c 100%);
+            color: var(--white);
+            padding: 60px 0 30px;
+            margin-top: 80px;
+        }
+        
+        .footer h5 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer a:hover {
+            color: var(--white);
+        }
+        
+        .social-icons a {
+            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            transition: var(--transition);
+        }
+        
+        .social-icons a:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-section {
+                padding: 80px 0;
+            }
+            
+            .chatbot-container {
+                width: 90%;
+                right: 5%;
+                max-height: 60vh;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .search-container {
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        /* Notification Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        
+        .toast {
+            background: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.5rem;
+        }
+        
+        .toast-success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .toast-error {
+            border-left: 4px solid var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Enhanced Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+    <img src="assets/images/logo.png" alt="StyleMe Logo" style="height: 70px; margin-right: 8px;">
+    StyleMe
+</a>
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">
+                            <i class="fas fa-shopping-bag me-1"></i>Products
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-layer-group me-1"></i>Categories
+                        </a>
+                        <ul class="dropdown-menu" id="categoriesMenu">
+                            <!-- Dynamically loaded from API -->
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">
+                            <i class="fas fa-envelope me-1"></i>Contact
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Search -->
+                    <div class="search-container">
+                        <div class="input-group">
+                            <input type="text" class="form-control search-input" id="searchInput" placeholder="Search products...">
+                            <button class="btn search-btn" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- User Dropdown -->
+                    <div class="dropdown user-dropdown">
+                        <button class="btn user-avatar" id="userDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li id="authLinks">
+                                <a class="dropdown-item" href="login.html">
+                                    <i class="fas fa-sign-in-alt"></i>Login
+                                </a>
+                                <a class="dropdown-item" href="register.html">
+                                    <i class="fas fa-user-plus"></i>Register
+                                </a>
+                            </li>
+                            <li id="userLinks" style="display: none;">
+                                <h6 class="dropdown-header" id="userName">Welcome!</h6>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="profile.html">
+                                    <i class="fas fa-user-circle"></i>Profile
+                                </a>
+                                <a class="dropdown-item" href="cart.html">
+                                    <i class="fas fa-shopping-cart"></i>Cart
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-heart"></i>Wishlist
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item text-danger" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>Logout
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Cart -->
+                    <a href="cart.html" class="btn cart-btn position-relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center hero-content">
+                    <h1 class="hero-title">Discover Sri Lanka's Finest Fashion</h1>
+                    <p class="hero-subtitle">Shop the latest trends in clothing, accessories and more with islandwide delivery</p>
+                    <div class="hero-search">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="heroSearch" placeholder="Try 'red sleeveless floral dress'...">
+                            <button class="btn" id="heroSearchBtn">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="container mb-5">
+        <div class="section-header">
+            <h2 class="section-title">Shop by Category</h2>
+            <a href="products.html" class="view-all-btn">View All</a>
+        </div>
+        <div class="row" id="featuredCategories">
+            <!-- Dynamically loaded from API -->
+        </div>
+    </section>
+
+    <!-- Trending Products -->
+    <section class="container mb-5">
+        <div class="section-header">
+            <h2 class="section-title">Trending Now</h2>
+            <a href="products.html" class="view-all-btn">View All</a>
+        </div>
+        <div class="row" id="trendingProducts">
+            <!-- Dynamically loaded from API -->
+        </div>
+    </section>
+
+    <!-- Special Offers -->
+    <section class="container mb-5">
+        <div class="section-header">
+            <h2 class="section-title">Special Offers</h2>
+            <a href="products.html?filter=discount" class="view-all-btn">View All</a>
+        </div>
+        <div class="row" id="specialOffers">
+            <!-- Dynamically loaded from API -->
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h4 class="feature-title">Islandwide Delivery</h4>
+                        <p class="feature-description">Fast and reliable delivery to all parts of Sri Lanka with real-time tracking</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <h4 class="feature-title">Easy Returns</h4>
+                        <p class="feature-description">7-day hassle-free return policy for your complete peace of mind</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="feature-title">Secure Payment</h4>
+                        <p class="feature-description">100% secure payment options with advanced encryption technology</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enhanced Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="#"></i>StyleMe</h5>
+                    <p class="mb-4">Sri Lanka's premier online fashion destination offering the latest trends at affordable prices with exceptional customer service.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h5>Shop</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Men's Fashion</a></li>
+                        <li class="mb-2"><a href="#">Women's Fashion</a></li>
+                        <li class="mb-2"><a href="#">Kids Collection</a></li>
+                        <li class="mb-2"><a href="#">Accessories</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h5>Support</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Help Center</a></li>
+                        <li class="mb-2"><a href="#">Shipping Info</a></li>
+                        <li class="mb-2"><a href="#">Returns</a></li>
+                        <li class="mb-2"><a href="#">Size Guide</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Stay Updated</h5>
+                    <p class="mb-3">Subscribe to get updates on new arrivals and exclusive offers</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email address">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 StyleMe. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="me-3">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Enhanced Chatbot -->
+    <button class="chatbot-btn" id="chatbotToggle">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <h6 class="mb-0"><i class="fas fa-robot me-2"></i>Fashion Assistant</h6>
+            <button class="btn btn-sm btn-light" id="closeChatbot">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="d-flex flex-column">
+                <div class="message bot-message">
+                    👋 Hello! I'm your StyleMe assistant. How can I help you find the perfect outfit today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" class="form-control" id="chatbotInput" placeholder="Type your message...">
+            <button class="btn btn-primary" id="sendChatbotMessage">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize app
+            initializeApp();
+            
+            // Event listeners
+            setupEventListeners();
+        });
+        
+        function initializeApp() {
+            checkAuthStatus();
+            loadCategories();
+            loadFeaturedCategories();
+            loadTrendingProducts();
+            loadSpecialOffers();
+            updateCartCount();
+        }
+        
+        function setupEventListeners() {
+    // Search functionality
+    $('#searchBtn, #heroSearchBtn').click(handleSearch);
+    $('#searchInput, #heroSearch').keypress(handleSearchKeypress);
+    
+    // Enhanced logout functionality with proper event delegation
+    $(document).off('click', '#logoutBtn').on('click', '#logoutBtn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        logoutUser();
+    });
+    
+    // Enhanced add to cart functionality with multiple selector support
+    $(document).off('click', '.add-to-cart-btn, .btn[data-product-id], .btn[data-id]')
+              .on('click', '.add-to-cart-btn, .btn[data-product-id], .btn[data-id]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Only handle if it's an add to cart button
+        if ($(this).hasClass('add-to-cart-btn') || $(this).find('.fa-cart-plus').length > 0) {
+            handleAddToCart.call(this);
+        }
+    });
+    
+    // Chatbot functionality
+    $('#chatbotToggle').click(() => $('#chatbotContainer').toggle());
+    $('#closeChatbot').click(() => $('#chatbotContainer').hide());
+    $('#sendChatbotMessage').click(sendChatbotMessage);
+    $('#chatbotInput').keypress(handleChatbotKeypress);
+}
+
+        
+        function handleSearch() {
+            const query = $(this).attr('id') === 'searchBtn' ? $('#searchInput').val() : $('#heroSearch').val();
+            if (query.trim() !== '') {
+                showToast('Searching for: ' + query, 'info');
+                window.location.href = `products.html?search=${encodeURIComponent(query)}`;
+            }
+        }
+        
+        function handleSearchKeypress(e) {
+            if (e.which === 13) {
+                const query = $(this).val();
+                if (query.trim() !== '') {
+                    showToast('Searching for: ' + query, 'info');
+                    window.location.href = `products.html?search=${encodeURIComponent(query)}`;
+                }
+            }
+        }
+        
+        function handleChatbotKeypress(e) {
+            if (e.which === 13) {
+                sendChatbotMessage();
+            }
+        }
+        
+        
+function handleAddToCart() {
+    // Try multiple ways to get product ID for compatibility
+    const productId = $(this).data('product-id') || $(this).data('id') || $(this).attr('data-product-id') || $(this).attr('data-id');
+    const $btn = $(this);
+    
+    console.log('Add to cart clicked, Product ID:', productId); // Debug log
+    
+    if (!productId || productId === 'undefined' || productId === '') {
+        console.error('Product ID not found. Button data:', $(this).data());
+        showToast('Product ID not found. Please refresh the page and try again.', 'error');
+        return;
+    }
+    
+    // Validate product ID is a number
+    const numericProductId = parseInt(productId);
+    if (isNaN(numericProductId) || numericProductId <= 0) {
+        console.error('Invalid product ID:', productId);
+        showToast('Invalid product selected. Please try again.', 'error');
+        return;
+    }
+    
+    // Add loading state
+    const originalHtml = $btn.html();
+    $btn.addClass('loading').html('<span class="spinner-border spinner-border-sm"></span>');
+    $btn.prop('disabled', true);
+    
+    $.ajax({
+        url: 'api/cart.php',
+        type: 'POST',
+        dataType: 'json',
+        data: { 
+            action: 'add', 
+            product_id: numericProductId,
+            quantity: 1
+        },
+        timeout: 10000,
+        success: function(response) {
+            console.log('Cart response:', response);
+            
+            if (response.success) {
+                updateCartCount();
+                showToast('Product added to cart!', 'success');
+                $btn.removeClass('loading').html('<i class="fas fa-check"></i> Added');
+                
+                setTimeout(() => {
+                    $btn.html('<i class="fas fa-cart-plus"></i>');
+                }, 2000);
+            } else {
+                showToast(response.message || 'Failed to add item to cart', 'error');
+                
+                // If authentication required, redirect to login
+                if (response.message && response.message.toLowerCase().includes('login')) {
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+                }
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Cart AJAX Error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                productId: numericProductId
+            });
+            
+            if (status === 'timeout') {
+                showToast('Request timed out. Please try again.', 'error');
+            } else if (xhr.status === 401) {
+                showToast('Please login to add items to cart', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } else {
+                showToast('Something went wrong. Please try again.', 'error');
+            }
+        },
+        complete: function() {
+            $btn.removeClass('loading').prop('disabled', false);
+            if ($btn.html().includes('spinner')) {
+                $btn.html(originalHtml);
+            }
+        }
+    });
+}
+
+
+        
+        function checkAuthStatus() {
+            $.ajax({
+                url: 'api/auth.php?action=check',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.loggedIn) {
+                        $('#authLinks').hide();
+                        $('#userLinks').show();
+                        $('#userName').text(`Welcome, ${response.user.name}!`);
+                        
+                        // Update user avatar with first letter of name
+                        const firstLetter = response.user.name.charAt(0).toUpperCase();
+                        $('#userDropdown').html(firstLetter);
+                    } else {
+                        $('#authLinks').show();
+                        $('#userLinks').hide();
+                        $('#userDropdown').html('<i class="fas fa-user"></i>');
+                    }
+                },
+                error: function() {
+                    console.log('Auth check failed');
+                }
+            });
+        }
+        
+        function logoutUser() {
+            // Show loading state
+            $('#logoutBtn').html('<span class="spinner me-2"></span>Logging out...');
+            
+            $.ajax({
+                url: 'api/auth.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { action: 'logout' },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Logged out successfully!', 'success');
+                        
+                        // Reset UI state
+                        $('#authLinks').show();
+                        $('#userLinks').hide();
+                        $('#userDropdown').html('<i class="fas fa-user"></i>');
+                        $('#cartCount').text('0');
+                        
+                        // Redirect after short delay
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    } else {
+                        showToast('Logout failed. Please try again.', 'error');
+                        $('#logoutBtn').html('<i class="fas fa-sign-out-alt"></i>Logout');
+                    }
+                },
+                error: function() {
+                    showToast('Network error. Please try again.', 'error');
+                    $('#logoutBtn').html('<i class="fas fa-sign-out-alt"></i>Logout');
+                }
+            });
+        }
+        
+        function loadCategories() {
+            $.ajax({
+                url: 'api/products.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(categories) {
+                    const $menu = $('#categoriesMenu');
+                    $menu.empty();
+                    
+                    categories.forEach(category => {
+                        $menu.append(`
+                            <li>
+                                <a class="dropdown-item" href="products.html?category=${category.id}">
+                                    <i class="fas fa-tag me-2"></i>${category.name}
+                                </a>
+                            </li>
+                        `);
+                    });
+                    
+                    $menu.append('<li><hr class="dropdown-divider"></li>');
+                    $menu.append(`
+                        <li>
+                            <a class="dropdown-item" href="products.html">
+                                <i class="fas fa-th me-2"></i>All Categories
+                            </a>
+                        </li>
+                    `);
+                }
+            });
+        }
+        
+        function loadFeaturedCategories() {
+            $.ajax({
+                url: 'api/products.php?action=featured_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(categories) {
+                    const $container = $('#featuredCategories');
+                    $container.empty();
+                    
+                    categories.forEach(category => {
+                        $container.append(`
+                            <div class="col-md-4 col-6 mb-4">
+                                <div class="category-card position-relative">
+                                    <a href="products.html?category=${category.id}">
+                                        <img src="assets/uploads/${category.image}" alt="${category.name}" class="img-fluid w-100" style="height: 200px; object-fit: cover;">
+                                        <div class="category-overlay">
+                                            <h5 class="category-title">${category.name}</h5>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        `);
+                    });
+                },
+                error: function() {
+                    $('#featuredCategories').html(`
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                            <p>Unable to load categories. Please try again later.</p>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function loadTrendingProducts() {
+            $.ajax({
+                url: 'api/products.php?action=trending',
+                type: 'GET',
+                dataType: 'json',
+                success: function(products) {
+                    const $container = $('#trendingProducts');
+                    $container.empty();
+                    
+                    if (products.length === 0) {
+                        $container.html(`
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-box-open fa-2x text-muted mb-3"></i>
+                                <p>No trending products available at the moment.</p>
+                            </div>
+                        `);
+                        return;
+                    }
+                    
+                    products.forEach(product => {
+                        $container.append(createProductCard(product));
+                    });
+                },
+                error: function() {
+                    $('#trendingProducts').html(`
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                            <p>Unable to load trending products. Please try again later.</p>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function loadSpecialOffers() {
+            $.ajax({
+                url: 'api/products.php?action=discounted',
+                type: 'GET',
+                dataType: 'json',
+                success: function(products) {
+                    const $container = $('#specialOffers');
+                    $container.empty();
+                    
+                    if (products.length === 0) {
+                        $container.html(`
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-percentage fa-2x text-muted mb-3"></i>
+                                <p>No special offers available at the moment.</p>
+                            </div>
+                        `);
+                        return;
+                    }
+                    
+                    products.forEach(product => {
+                        $container.append(createProductCard(product));
+                    });
+                },
+                error: function() {
+                    $('#specialOffers').html(`
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                            <p>Unable to load special offers. Please try again later.</p>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function createProductCard(product) {
+    const price = parseFloat(product.price) || 0;
+    const discountPrice = parseFloat(product.discount_price) || 0;
+    
+    const hasDiscount = discountPrice > 0 && discountPrice < price;
+    const discountPercentage = hasDiscount 
+        ? Math.round(((price - discountPrice) / price) * 100)
+        : 0;
+    
+    const finalPrice = hasDiscount ? discountPrice : price;
+    
+    return `
+        <div class="col-lg-3 col-md-4 col-6 mb-4">
+            <div class="card product-card h-100">
+                ${hasDiscount ? `<div class="product-badge">${discountPercentage}% OFF</div>` : ''}
+                <a href="product-detail.html?id=${product.id}">
+                    <img src="assets/uploads/${product.image1}" class="card-img-top product-img" alt="${product.name}" onerror="this.src='assets/images/placeholder.jpg'">
+                </a>
+                <div class="card-body product-body">
+                    <h6 class="card-title">
+                        <a href="product-detail.html?id=${product.id}" class="product-title">${product.name}</a>
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            ${hasDiscount 
+                                ? `<span class="product-price">Rs. ${discountPrice.toFixed(2)}</span>
+                                   <span class="product-price-original">Rs. ${price.toFixed(2)}</span>`
+                                : `<span class="product-price">Rs. ${price.toFixed(2)}</span>`
+                            }
+                        </div>
+                        <button class="btn add-to-cart-btn" 
+                                data-product-id="${product.id}" 
+                                data-product-name="${product.name}" 
+                                data-product-price="${finalPrice}"
+                                title="Add to Cart">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+        
+        function updateCartCount() {
+            $.ajax({
+                url: 'api/cart.php?action=count',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    $('#cartCount').text(response.count || 0);
+                },
+                error: function() {
+                    $('#cartCount').text('0');
+                }
+            });
+        }
+        
+        function sendChatbotMessage() {
+            const message = $('#chatbotInput').val().trim();
+            if (message === '') return;
+            
+            const $messages = $('#chatbotMessages .d-flex');
+            $messages.append(`
+                <div class="message user-message">
+                    ${message}
+                </div>
+            `);
+            
+            $('#chatbotInput').val('');
+            $('#chatbotMessages').scrollTop($('#chatbotMessages')[0].scrollHeight);
+            
+            // Simulate typing indicator
+            $messages.append(`
+                <div class="message bot-message typing">
+                    <span class="spinner me-2"></span>Typing...
+                </div>
+            `);
+            $('#chatbotMessages').scrollTop($('#chatbotMessages')[0].scrollHeight);
+            
+            $.ajax({
+                url: 'api/chatbot.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { message: message },
+                success: function(response) {
+                    setTimeout(() => {
+                        $('.typing').remove();
+                        $messages.append(`
+                            <div class="message bot-message">
+                                ${response.reply || 'I apologize, but I\'m having trouble understanding. Could you please rephrase your question?'}
+                            </div>
+                        `);
+                        $('#chatbotMessages').scrollTop($('#chatbotMessages')[0].scrollHeight);
+                    }, 1000);
+                },
+                error: function() {
+                    setTimeout(() => {
+                        $('.typing').remove();
+                        $messages.append(`
+                            <div class="message bot-message">
+                                I'm sorry, I'm experiencing technical difficulties. Please try again later.
+                            </div>
+                        `);
+                        $('#chatbotMessages').scrollTop($('#chatbotMessages')[0].scrollHeight);
+                    }, 1000);
+                }
+            });
+        }
+        
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const iconMap = {
+                success: 'fas fa-check-circle text-success',
+                error: 'fas fa-exclamation-circle text-danger',
+                warning: 'fas fa-exclamation-triangle text-warning',
+                info: 'fas fa-info-circle text-info'
+            };
+            
+            const toast = `
+                <div class="toast toast-${type}" id="${toastId}" role="alert">
+                    <div class="toast-header">
+                        <i class="${iconMap[type]} me-2"></i>
+                        <strong class="me-auto">StyleMe</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            $('#toastContainer').append(toast);
+            const toastElement = new bootstrap.Toast(document.getElementById(toastId));
+            toastElement.show();
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                $(`#${toastId}`).remove();
+            }, 5000);
+        }
+
+        // Enhanced AI Chatbot System
+class IntelligentChatbot {
+    constructor() {
+        this.isOpen = false;
+        this.isTyping = false;
+        this.messageHistory = [];
+        this.suggestions = [];
+        this.currentContext = {};
+        this.init();
+    }
+    
+    init() {
+        this.bindEvents();
+        this.loadWelcomeMessage();
+        this.loadSmartSuggestions();
+    }
+    
+    bindEvents() {
+        // Toggle chatbot
+        $('#chatbotToggle').click(() => this.toggle());
+        $('#closeChatbot').click(() => this.close());
+        
+        // Send message
+        $('#sendChatbotMessage').click(() => this.sendMessage());
+        $('#chatbotInput').keypress((e) => {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                this.sendMessage();
+            }
+        });
+        
+        // Smart suggestions
+        $(document).on('click', '.chat-suggestion', (e) => {
+            const suggestion = $(e.target).text().trim();
+            this.sendMessage(suggestion);
+        });
+        
+        // Action buttons
+        $(document).on('click', '.chat-action-btn', (e) => {
+            const action = $(e.target).data('action');
+            const data = $(e.target).data('data');
+            this.handleAction(action, data);
+        });
+        
+        // Voice input (if supported)
+        if ('webkitSpeechRecognition' in window) {
+            this.setupVoiceInput();
+        }
+    }
+    
+    setupVoiceInput() {
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        $('#chatbotInput').after(`
+            <button class="btn btn-sm btn-outline-secondary voice-btn" id="voiceBtn" title="Voice Input">
+                <i class="fas fa-microphone"></i>
+            </button>
+        `);
+        
+        $('#voiceBtn').click(() => {
+            recognition.start();
+            $('#voiceBtn').html('<i class="fas fa-stop text-danger"></i>');
+        });
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            $('#chatbotInput').val(transcript);
+            $('#voiceBtn').html('<i class="fas fa-microphone"></i>');
+        };
+        
+        recognition.onerror = () => {
+            $('#voiceBtn').html('<i class="fas fa-microphone"></i>');
+        };
+    }
+    
+    loadWelcomeMessage() {
+        const welcomeMessage = {
+            role: 'assistant',
+            content: "👋 Hello! I'm your intelligent StyleMe assistant powered by AI. I understand natural language and can help you:\n\n🔍 **Search products naturally** - Just say what you want!\n📂 **Browse categories intelligently**\n💰 **Find products by price**\n🌟 **Get personalized recommendations**\n📦 **Track your orders**\n\nTry asking: *'Show me red dresses under Rs. 5000'* or *'What's trending in men's wear?'*",
+            suggestions: [
+                "🔍 Find red dresses under Rs. 3000",
+                "👔 Show me men's formal wear", 
+                "👟 What shoes are trending?",
+                "🌟 Recommend something for me"
+            ]
+        };
+        
+        this.addMessage(welcomeMessage);
+    }
+    
+    async loadSmartSuggestions() {
+        try {
+            const response = await $.ajax({
+                url: 'api/chatbot.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { action: 'get_suggestions' }
+            });
+            
+            if (response.success) {
+                this.suggestions = response.suggestions;
+            }
+        } catch (error) {
+            console.log('Could not load smart suggestions');
+        }
+    }
+    
+    sendMessage(messageText = null) {
+        const message = messageText || $('#chatbotInput').val().trim();
+        
+        if (!message) return;
+        
+        // Clear input
+        $('#chatbotInput').val('');
+        
+        // Add user message
+        this.addMessage({
+            role: 'user',
+            content: message
+        });
+        
+        // Show intelligent typing indicator
+        this.showIntelligentTyping();
+        
+        // Send to AI backend
+        $.ajax({
+            url: 'api/chatbot.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'chat',
+                message: message
+            },
+            success: (response) => {
+                this.hideTyping();
+                
+                if (response.success) {
+                    this.addMessage({
+                        role: 'assistant',
+                        content: response.reply,
+                        suggestions: response.suggestions || [],
+                        actions: response.actions || [],
+                        intent: response.intent,
+                        confidence: response.confidence
+                    });
+                    
+                    // Update context
+                    this.currentContext = {
+                        intent: response.intent,
+                        confidence: response.confidence
+                    };
+                } else {
+                    this.addMessage({
+                        role: 'assistant',
+                        content: "I'm sorry, I'm having trouble processing your request. Please try rephrasing or contact our support team."
+                    });
+                }
+            },
+            error: (xhr, status, error) => {
+                this.hideTyping();
+                console.error('Chatbot error:', error);
+                
+                this.addMessage({
+                    role: 'assistant',
+                    content: "I'm experiencing technical difficulties. Please try again in a moment."
+                });
+            }
+        });
+    }
+    
+    addMessage(message) {
+        const $messages = $('#chatbotMessages .d-flex');
+        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        let messageHtml = '';
+        
+        if (message.role === 'user') {
+            messageHtml = `
+                <div class="message user-message fade-in">
+                    <div class="message-content">${this.formatMessage(message.content)}</div>
+                    <div class="message-time">${timestamp}</div>
+                </div>
+            `;
+        } else {
+            const confidenceIndicator = message.confidence ? 
+                `<div class="confidence-indicator">Confidence: ${Math.round(message.confidence * 100)}%</div>` : '';
+            
+            messageHtml = `
+                <div class="message bot-message fade-in">
+                    <div class="message-content">${this.formatMessage(message.content)}</div>
+                    <div class="message-time">${timestamp}</div>
+                    ${confidenceIndicator}
+                    ${this.renderActions(message.actions || [])}
+                    ${this.renderSuggestions(message.suggestions || [])}
+                </div>
+            `;
+        }
+        
+        $messages.append(messageHtml);
+        this.scrollToBottom();
+        
+        // Store in history
+        this.messageHistory.push(message);
+        
+        // Keep only last 50 messages
+        if (this.messageHistory.length > 50) {
+            this.messageHistory = this.messageHistory.slice(-50);
+        }
+    }
+    
+    formatMessage(content) {
+        // Convert markdown-like formatting to HTML
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            .replace(/\n/g, '<br>');
+    }
+    
+    renderActions(actions) {
+        if (!actions || actions.length === 0) return '';
+        
+        let actionsHtml = '<div class="chat-actions mt-3">';
+        
+        actions.forEach(action => {
+            switch (action.type) {
+                case 'products':
+                    actionsHtml += this.renderProductCards(action.data);
+                    break;
+                case 'categories':
+                    actionsHtml += this.renderCategoryCards(action.data);
+                    break;
+                case 'orders':
+                    actionsHtml += this.renderOrderCards(action.data);
+                    break;
+                case 'recommendations':
+                    actionsHtml += this.renderRecommendationCards(action.data);
+                    break;
+            }
+        });
+        
+        actionsHtml += '</div>';
+        return actionsHtml;
+    }
+    
+    renderProductCards(products) {
+        let html = '<div class="ai-product-cards">';
+        
+        products.slice(0, 4).forEach(product => {
+            const price = product.discount_price > 0 ? product.discount_price : product.price;
+            const originalPrice = product.price;
+            const hasDiscount = product.discount_price > 0;
+            const discountPercent = hasDiscount ? Math.round(((originalPrice - product.discount_price) / originalPrice) * 100) : 0;
+            
+            html += `
+                <div class="ai-product-card">
+                    <div class="product-image-container">
+                        <img src="assets/uploads/${product.image1}" alt="${product.name}" class="ai-product-image">
+                        ${hasDiscount ? `<div class="discount-badge">${discountPercent}% OFF</div>` : ''}
+                    </div>
+                    <div class="ai-product-info">
+                        <h6 class="ai-product-name">${product.name}</h6>
+                        <div class="ai-product-category">${product.category_name}</div>
+                        <div class="ai-product-price">
+                            Rs. ${parseFloat(price).toFixed(2)}
+                            ${hasDiscount ? `<span class="original-price">Rs. ${parseFloat(originalPrice).toFixed(2)}</span>` : ''}
+                        </div>
+                        <div class="ai-product-actions">
+                            <button class="btn btn-sm btn-primary chat-action-btn" data-action="view_product" data-data="${product.id}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary chat-action-btn" data-action="add_to_cart" data-data="${product.id}">
+                                <i class="fas fa-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (products.length > 4) {
+            html += `
+                <div class="view-more-card">
+                    <div class="view-more-content">
+                        <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                        <div>+${products.length - 4} more</div>
+                        <button class="btn btn-outline-primary btn-sm mt-2 chat-action-btn" data-action="view_all_products">
+                            View All
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+    
+    renderCategoryCards(categories) {
+        let html = '<div class="ai-category-cards">';
+        
+        categories.forEach(category => {
+            html += `
+                <div class="ai-category-card">
+                    <img src="assets/uploads/${category.image}" alt="${category.name}" class="ai-category-image">
+                    <div class="ai-category-info">
+                        <h6 class="ai-category-name">${category.name}</h6>
+                        <div class="ai-category-count">${category.product_count || 0} products</div>
+                        <button class="btn btn-sm btn-primary chat-action-btn" data-action="browse_category" data-data="${category.id}">
+                            Browse
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        return html;
+    }
+    
+    renderSuggestions(suggestions) {
+        if (!suggestions || suggestions.length === 0) return '';
+        
+        let html = '<div class="ai-suggestions mt-3">';
+        html += '<div class="suggestions-label">💡 Try asking:</div>';
+        html += '<div class="suggestions-container">';
+        
+        suggestions.forEach(suggestion => {
+            html += `<button class="btn btn-sm btn-outline-secondary chat-suggestion">${suggestion}</button>`;
+        });
+        
+        html += '</div></div>';
+        return html;
+    }
+    
+    handleAction(action, data) {
+        switch (action) {
+            case 'view_product':
+                window.open(`product-detail.html?id=${data}`, '_blank');
+                break;
+            case 'add_to_cart':
+                this.addToCartFromChat(data);
+                break;
+            case 'browse_category':
+                window.open(`products.html?category=${data}`, '_blank');
+                break;
+            case 'view_all_products':
+                window.open('products.html', '_blank');
+                break;
+        }
+    }
+    
+    addToCartFromChat(productId) {
+        $.ajax({
+            url: 'api/cart.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'add',
+                product_id: productId,
+                quantity: 1
+            },
+            success: (response) => {
+                if (response.success) {
+                    this.addMessage({
+                        role: 'assistant',
+                        content: "✅ Perfect! I've added that item to your cart. You can continue shopping or proceed to checkout whenever you're ready.",
+                        suggestions: [
+                            "🛒 View my cart",
+                            "💳 Proceed to checkout",
+                            "🔍 Find similar products",
+                            "🛍️ Continue shopping"
+                        ]
+                    });
+                    updateCartCount();
+                } else {
+                    this.addMessage({
+                        role: 'assistant',
+                        content: `Sorry, I couldn't add that item to your cart. ${response.message || 'Please try again.'}`
+                    });
+                }
+            },
+            error: () => {
+                this.addMessage({
+                    role: 'assistant',
+                    content: "I'm having trouble adding that item to your cart. Please try again or add it directly from the product page."
+                });
+            }
+        });
+    }
+    
+    showIntelligentTyping() {
+        if (this.isTyping) return;
+        
+        this.isTyping = true;
+        const $messages = $('#chatbotMessages .d-flex');
+        
+        const typingMessages = [
+            "🤖 Analyzing your request...",
+            "🔍 Searching our catalog...",
+            "💭 Processing with AI...",
+            "📊 Finding the best matches..."
+        ];
+        
+        const randomMessage = typingMessages[Math.floor(Math.random() * typingMessages.length)];
+        
+        $messages.append(`
+            <div class="message bot-message typing-indicator">
+                <div class="ai-typing-content">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="typing-text">${randomMessage}</div>
+                </div>
+            </div>
+        `);
+        this.scrollToBottom();
+    }
+    
+    hideTyping() {
+        this.isTyping = false;
+        $('.typing-indicator').remove();
+    }
+    
+    scrollToBottom() {
+        const $messages = $('#chatbotMessages');
+        $messages.scrollTop($messages[0].scrollHeight);
+    }
+    
+    clearChat() {
+        $('#chatbotMessages .d-flex').empty();
+        this.messageHistory = [];
+        this.currentContext = {};
+        
+        $.ajax({
+            url: 'api/chatbot.php',
+            type: 'POST',
+            data: { action: 'clear_context' }
+        });
+        
+        this.loadWelcomeMessage();
+    }
+}
+
+// Initialize intelligent chatbot
+let aiChatbot;
+$(document).ready(function() {
+    aiChatbot = new IntelligentChatbot();
+    
+    // Add enhanced controls to chatbot header
+    $('#chatbotContainer .chatbot-header').append(`
+        <div class="chatbot-controls">
+            <button class="btn btn-sm btn-light" onclick="aiChatbot.clearChat()" title="Clear Chat">
+                <i class="fas fa-broom"></i>
+            </button>
+            <button class="btn btn-sm btn-light" onclick="aiChatbot.loadSmartSuggestions()" title="Smart Suggestions">
+                <i class="fas fa-lightbulb"></i>
+            </button>
+        </div>
+    `);
+});
+
+
+// Initialize enhanced chatbot
+let chatbot;
+$(document).ready(function() {
+    chatbot = new StyleMeChatbot();
+    
+    // Add clear chat button
+    $('#chatbotContainer .chatbot-header').append(`
+        <button class="btn btn-sm btn-light ms-2" onclick="chatbot.clearChat()" title="Clear Chat">
+            <i class="fas fa-broom"></i>
+        </button>
+    `);
+});
+
+    </script>
+</body>
+</html>

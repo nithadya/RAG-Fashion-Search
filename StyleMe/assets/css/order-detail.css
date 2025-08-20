@@ -1,0 +1,69 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --success-color: #48bb78;
+    --text-dark: #2d3748;
+    --text-light: #a0aec0;
+    --white: #ffffff;
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.order-detail-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.order-item {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-item-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.status-pending {
+    background: rgba(237, 137, 54, 0.1);
+    color: #ed8936;
+}
+
+.status-processing {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+.status-shipped {
+    background: rgba(72, 187, 120, 0.1);
+    color: var(--success-color);
+}
+
+.status-delivered {
+    background: rgba(72, 187, 120, 0.2);
+    color: var(--success-color);
+}

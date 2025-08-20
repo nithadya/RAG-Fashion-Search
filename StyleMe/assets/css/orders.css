@@ -1,0 +1,100 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --success-color: #48bb78;
+    --warning-color: #ed8936;
+    --error-color: #f56565;
+    --text-dark: #2d3748;
+    --text-light: #a0aec0;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.orders-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.order-card {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: rgba(237, 137, 54, 0.1);
+    color: var(--warning-color);
+}
+
+.status-processing {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+.status-shipped {
+    background: rgba(72, 187, 120, 0.1);
+    color: var(--success-color);
+}
+
+.status-delivered {
+    background: rgba(72, 187, 120, 0.2);
+    color: var(--success-color);
+}
+
+.status-cancelled {
+    background: rgba(245, 101, 101, 0.1);
+    color: var(--error-color);
+}
+
+.empty-orders {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-orders i {
+    font-size: 4rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}

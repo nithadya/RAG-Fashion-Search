@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - StyleMe</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/cart.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">StyleMe</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.html">Products</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu" id="categoriesMenu"></ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html
+                        ">Contact</a></li>
+                </ul>
+                <div class="d-flex">
+                    <div class="input-group me-3">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
+                        <button class="btn btn-primary" id="searchBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" 
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li id="authLinks">
+                                <a class="dropdown-item" href="login.html"><i class="fas fa-sign-in-alt me-2"></i>Login</a>
+                                <a class="dropdown-item" href="register.html"><i class="fas fa-user-plus me-2"></i>Register</a>
+                            </li>
+                            <li id="userLinks" style="display: none;">
+                                <h6 class="dropdown-header" id="userWelcome">
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    <span id="userDisplayName">Welcome</span>
+                                </h6>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a>
+                                <a class="dropdown-item" href="orders.html"><i class="fas fa-box me-2"></i>My Orders</a>
+                                <a class="dropdown-item" href="cart.html"><i class="fas fa-shopping-cart me-2"></i>Cart</a>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item text-danger" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="cart.html" class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge bg-danger" id="cartCount">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Section -->
+    <section class="py-5">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
+                </ol>
+            </nav>
+            <h2 class="mb-4">Your Shopping Cart</h2>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="cart-container" id="cartItemsContainer"></div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="summary-card sticky-top" style="top: 20px;">
+                        <h5 class="mb-4">Order Summary</h5>
+                        <div id="orderSummary"></div>
+                        <a href="checkout.html" class="btn btn-primary w-100 mt-3" id="checkoutBtn">Proceed to Checkout</a>
+                        <a href="products.html" class="btn btn-outline-secondary w-100 mt-2">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Dark) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>StyleMe</h5>
+                    <p>Sri Lanka's premier online fashion destination offering the latest trends at affordable prices.</p>
+                    <div class="social-icons">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4 mb-md-0">
+                    <h5>Shop</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Men</a></li>
+                        <li><a href="#">Women</a></li>
+                        <li><a href="#">Kids</a></li>
+                        <li><a href="#">Accessories</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4 mb-md-0">
+                    <h5>Help</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Shipping</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Newsletter</h5>
+                    <p>Subscribe to get updates on new arrivals and special offers</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-primary" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2025 StyleMe. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="me-3">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/cart.js"></script>
+</body>
+</html>

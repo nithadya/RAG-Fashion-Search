@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management - StyleMe</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        /* Reuse admin styles from dashboard.html */
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #6c757d;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            background-color: var(--dark-color);
+            color: white;
+            position: fixed;
+            width: 250px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-menu li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .sidebar-menu li a:hover {
+            color: var(--accent-color);
+        }
+        
+        .sidebar-menu li.active {
+            background-color: var(--primary-color);
+        }
+        
+        .sidebar-menu li i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-admin {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-admin {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .table-responsive {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table th {
+            border-top: none;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .badge-stock {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-instock {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-outstock {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-btns .btn {
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            
+            .sidebar.active {
+                margin-left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar (same as dashboard.html) -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4>StyleMe Admin</h4>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="active">
+                <a href="products.html">
+                    <i class="fas fa-tshirt"></i> Products
+                </a>
+            </li>
+            <li>
+                <a href="categories.html">
+                    <i class="fas fa-list"></i> Categories
+                </a>
+            </li>
+            <li>
+                <a href="orders.html">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+            </li>
+            <li>
+                <a href="users.html">
+                    <i class="fas fa-users"></i> Users
+                </a>
+            </li>
+            <li>
+                <a href="feedback.html">
+                    <i class="fas fa-comment"></i> Feedback
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </li>
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar (same as dashboard.html) -->
+        <nav class="navbar navbar-expand-lg navbar-admin mb-4">
+            <div class="container-fluid">
+                <button class="btn btn-link text-dark" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="d-flex align-items-center">
+                    <div class="dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> Admin User
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Product Management</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fas fa-plus me-2"></i> Add Product
+                </button>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card-admin mb-4">
+                <div class="card-body">
+                    <form id="productFilters">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="searchProduct" class="form-label">Search</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Product name or SKU">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="categoryFilter" class="form-label">Category</label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">All Categories</option>
+                                    <!-- Categories will be loaded here -->
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="in_stock">In Stock</option>
+                                    <option value="out_of_stock">Out of Stock</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-2"></i> Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Products Table -->
+            <div class="table-responsive">
+                <table class="table table-hover" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Pagination will be loaded here -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addProductForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="productName" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control" id="productName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productCategory" class="form-label">Category</label>
+                                    <select class="form-select" id="productCategory" required>
+                                        <!-- Categories will be loaded here -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productBrand" class="form-label">Brand</label>
+                                    <input type="text" class="form-control" id="productBrand">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productPrice" class="form-label">Price (Rs.)</label>
+                                    <input type="number" class="form-control" id="productPrice" step="0.01" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productDiscount" class="form-label">Discount Price (Rs.)</label>
+                                    <input type="number" class="form-control" id="productDiscount" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="productStock" class="form-label">Stock Quantity</label>
+                                    <input type="number" class="form-control" id="productStock" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productSize" class="form-label">Sizes (comma separated)</label>
+                                    <input type="text" class="form-control" id="productSize" placeholder="S, M, L, XL">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productColor" class="form-label">Colors (comma separated)</label>
+                                    <input type="text" class="form-control" id="productColor" placeholder="Red, Blue, Green">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productGender" class="form-label">Gender</label>
+                                    <select class="form-select" id="productGender">
+                                        <option value="Unisex">Unisex</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="productOccasion" class="form-label">Occasion</label>
+                                    <input type="text" class="form-control" id="productOccasion" placeholder="Casual, Formal, Party">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="productDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productImages" class="form-label">Product Images</label>
+                            <input type="file" class="form-control" id="productImages" multiple accept="image/*">
+                            <small class="text-muted">First image will be used as the main image</small>
+                        </div>
+                        <div class="image-preview d-flex flex-wrap gap-2" id="imagePreview">
+                            <!-- Image previews will be shown here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editProductForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editProductId">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editProductName" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control" id="editProductName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductCategory" class="form-label">Category</label>
+                                    <select class="form-select" id="editProductCategory" required>
+                                        <!-- Categories will be loaded here -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductBrand" class="form-label">Brand</label>
+                                    <input type="text" class="form-control" id="editProductBrand">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductPrice" class="form-label">Price (Rs.)</label>
+                                    <input type="number" class="form-control" id="editProductPrice" step="0.01" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductDiscount" class="form-label">Discount Price (Rs.)</label>
+                                    <input type="number" class="form-control" id="editProductDiscount" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editProductStock" class="form-label">Stock Quantity</label>
+                                    <input type="number" class="form-control" id="editProductStock" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductSize" class="form-label">Sizes (comma separated)</label>
+                                    <input type="text" class="form-control" id="editProductSize" placeholder="S, M, L, XL">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductColor" class="form-label">Colors (comma separated)</label>
+                                    <input type="text" class="form-control" id="editProductColor" placeholder="Red, Blue, Green">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductGender" class="form-label">Gender</label>
+                                    <select class="form-select" id="editProductGender">
+                                        <option value="Unisex">Unisex</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editProductOccasion" class="form-label">Occasion</label>
+                                    <input type="text" class="form-control" id="editProductOccasion" placeholder="Casual, Formal, Party">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editProductDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Images</label>
+                            <div class="current-images d-flex flex-wrap gap-2" id="currentImages">
+                                <!-- Current images will be shown here -->
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductImages" class="form-label">Add More Images</label>
+                            <input type="file" class="form-control" id="editProductImages" multiple accept="image/*">
+                        </div>
+                        <div class="edit-image-preview d-flex flex-wrap gap-2" id="editImagePreview">
+                            <!-- New image previews will be shown here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Check admin authentication
+            checkAdminAuth();
+            
+            // Load categories for filters and forms
+            loadCategories();
+            
+            // Load products
+            loadProducts();
+            
+            // Sidebar toggle
+            $('#sidebarToggle').click(function() {
+                $('#sidebar').toggleClass('active');
+                $('#mainContent').toggleClass('active');
+            });
+            
+            // Logout functionality
+            $('#logoutBtn').click(function(e) {
+                e.preventDefault();
+                logoutAdmin();
+            });
+            
+            // Product image preview for add form
+            $('#productImages').change(function() {
+                const files = this.files;
+                const $preview = $('#imagePreview');
+                $preview.empty();
+                
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            $preview.append(`
+                                <div class="position-relative" style="width: 100px; height: 100px;">
+                                    <img src="${e.target.result}" class="img-thumbnail h-100" alt="Preview">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removePreviewImage(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `);
+                        }
+                        reader.readAsDataURL(files[i]);
+                    }
+                }
+            });
+            
+            // Product image preview for edit form
+            $('#editProductImages').change(function() {
+                const files = this.files;
+                const $preview = $('#editImagePreview');
+                $preview.empty();
+                
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            $preview.append(`
+                                <div class="position-relative" style="width: 100px; height: 100px;">
+                                    <img src="${e.target.result}" class="img-thumbnail h-100" alt="Preview">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removePreviewImage(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `);
+                        }
+                        reader.readAsDataURL(files[i]);
+                    }
+                }
+            });
+            
+            // Add product form submission
+            $('#addProductForm').submit(function(e) {
+                e.preventDefault();
+                addProduct();
+            });
+            
+            // Edit product form submission
+            $('#editProductForm').submit(function(e) {
+                e.preventDefault();
+                updateProduct();
+            });
+            
+            // Filter form submission
+            $('#productFilters').submit(function(e) {
+                e.preventDefault();
+                loadProducts();
+            });
+        });
+        
+        function checkAdminAuth() {
+            $.ajax({
+                url: '../api/auth.php?action=check_admin',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.loggedIn) {
+                        window.location.href = 'login.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+        
+        function loadCategories() {
+            $.ajax({
+                url: '../api/products.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(categories) {
+                    // Populate filter dropdown
+                    const $filterDropdown = $('#categoryFilter');
+                    $filterDropdown.empty();
+                    $filterDropdown.append('<option value="">All Categories</option>');
+                    
+                    // Populate add form dropdown
+                    const $addFormDropdown = $('#productCategory');
+                    $addFormDropdown.empty();
+                    $addFormDropdown.append('<option value="">Select Category</option>');
+                    
+                    // Populate edit form dropdown
+                    const $editFormDropdown = $('#editProductCategory');
+                    $editFormDropdown.empty();
+                    $editFormDropdown.append('<option value="">Select Category</option>');
+                    
+                    categories.forEach(category => {
+                        $filterDropdown.append(`<option value="${category.id}">${category.name}</option>`);
+                        $addFormDropdown.append(`<option value="${category.id}">${category.name}</option>`);
+                        $editFormDropdown.append(`<option value="${category.id}">${category.name}</option>`);
+                    });
+                }
+            });
+        }
+        
+        function loadProducts(page = 1) {
+            const search = $('#searchProduct').val();
+            const category = $('#categoryFilter').val();
+            const status = $('#statusFilter').val();
+            
+            $.ajax({
+                url: `../api/admin.php?action=products&page=${page}`,
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    search: search,
+                    category: category,
+                    status: status
+                },
+                success: function(response) {
+                    renderProducts(response.products);
+                    renderPagination(response.pagination);
+                }
+            });
+        }
+        
+        function renderProducts(products) {
+            const $tbody = $('#productsTable tbody');
+            $tbody.empty();
+            
+            if (products.length === 0) {
+                $tbody.append(`
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h4>No products found</h4>
+                            <p>Try adjusting your search or filter criteria</p>
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+            
+            products.forEach(product => {
+                const inStock = product.stock > 0;
+                const statusClass = inStock ? 'badge-instock' : 'badge-outstock';
+                const statusText = inStock ? 'In Stock' : 'Out of Stock';
+                
+                $tbody.append(`
+                    <tr>
+                        <td>
+                            <img src="../assets/uploads/${product.image1}" class="product-img" alt="${product.name}">
+                        </td>
+                        <td>${product.name}</td>
+                        <td>${product.category_name || 'N/A'}</td>
+                        <td>
+                            Rs. ${product.price.toFixed(2)}
+                            ${product.discount_price ? `<br><small class="text-danger"><del>Rs. ${product.discount_price.toFixed(2)}</del></small>` : ''}
+                        </td>
+                        <td>${product.stock}</td>
+                        <td><span class="badge-stock ${statusClass}">${statusText}</span></td>
+                        <td class="action-btns">
+                            <button class="btn btn-sm btn-outline-primary edit-product" data-id="${product.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-product" data-id="${product.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+            
+            // Add event listeners for edit buttons
+            $('.edit-product').click(function() {
+                const productId = $(this).data('id');
+                loadProductForEdit(productId);
+            });
+            
+            // Add event listeners for delete buttons
+            $('.delete-product').click(function() {
+                const productId = $(this).data('id');
+                deleteProduct(productId);
+            });
+        }
+        
+        function renderPagination(pagination) {
+            const $pagination = $('#pagination');
+            $pagination.empty();
+            
+            const totalPages = pagination.total_pages;
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            $pagination.append(`
+                <li class="page-item ${pagination.current_page <= 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${pagination.current_page - 1}">Previous</a>
+                </li>
+            `);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, pagination.current_page - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                $pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="1">1</a>
+                    </li>
+                    ${startPage > 2 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}
+                `);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                $pagination.append(`
+                    <li class="page-item ${i == pagination.current_page ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+            
+            if (endPage < totalPages) {
+                $pagination.append(`
+                    ${endPage < totalPages - 1 ? '<li class="page-item disabled"><span class="page-link">...</span></li>' : ''}
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `);
+            }
+            
+            // Next button
+            $pagination.append(`
+                <li class="page-item ${pagination.current_page >= totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${pagination.current_page + 1}">Next</a>
+                </li>
+            `);
+            
+            // Pagination click event
+            $pagination.on('click', '.page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                loadProducts(page);
+            });
+        }
+        
+        function loadProductForEdit(productId) {
+            $.ajax({
+                url: `../api/admin.php?action=product_detail&id=${productId}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(product) {
+                    if (product) {
+                        // Populate form fields
+                        $('#editProductId').val(product.id);
+                        $('#editProductName').val(product.name);
+                        $('#editProductCategory').val(product.category_id);
+                        $('#editProductBrand').val(product.brand || '');
+                        $('#editProductPrice').val(product.price);
+                        $('#editProductDiscount').val(product.discount_price || '');
+                        $('#editProductStock').val(product.stock);
+                        $('#editProductSize').val(product.size || '');
+                        $('#editProductColor').val(product.color || '');
+                        $('#editProductGender').val(product.gender);
+                        $('#editProductOccasion').val(product.occasion || '');
+                        $('#editProductDescription').val(product.description || '');
+                        
+                        // Show current images
+                        const $currentImages = $('#currentImages');
+                        $currentImages.empty();
+                        
+                        const images = [product.image1, product.image2, product.image3].filter(img => img);
+                        images.forEach((img, index) => {
+                            $currentImages.append(`
+                                <div class="position-relative" style="width: 100px; height: 100px;">
+                                    <img src="../assets/uploads/${img}" class="img-thumbnail h-100" alt="Product Image">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" 
+                                            onclick="removeProductImage(${product.id}, '${img}', this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `);
+                        });
+                        
+                        // Clear any new image previews
+                        $('#editImagePreview').empty();
+                        $('#editProductImages').val('');
+                        
+                        // Show modal
+                        const editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+                        editModal.show();
+                    }
+                }
+            });
+        }
+        
+        function addProduct() {
+            const formData = new FormData();
+            
+            // Add text fields
+            formData.append('name', $('#productName').val());
+            formData.append('category_id', $('#productCategory').val());
+            formData.append('brand', $('#productBrand').val());
+            formData.append('price', $('#productPrice').val());
+            formData.append('discount_price', $('#productDiscount').val());
+            formData.append('stock', $('#productStock').val());
+            formData.append('size', $('#productSize').val());
+            formData.append('color', $('#productColor').val());
+            formData.append('gender', $('#productGender').val());
+            formData.append('occasion', $('#productOccasion').val());
+            formData.append('description', $('#productDescription').val());
+            
+            // Add image files
+            const imageFiles = $('#productImages')[0].files;
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append('images[]', imageFiles[i]);
+            }
+            
+            $.ajax({
+                url: '../api/admin.php?action=add_product',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal and refresh products
+                        $('#addProductModal').modal('hide');
+                        $('#addProductForm')[0].reset();
+                        $('#imagePreview').empty();
+                        loadProducts();
+                        
+                        alert('Product added successfully');
+                    } else {
+                        alert(response.message || 'Error adding product');
+                    }
+                }
+            });
+        }
+        
+        function updateProduct() {
+            const formData = new FormData();
+            const productId = $('#editProductId').val();
+            
+            // Add text fields
+            formData.append('id', productId);
+            formData.append('name', $('#editProductName').val());
+            formData.append('category_id', $('#editProductCategory').val());
+            formData.append('brand', $('#editProductBrand').val());
+            formData.append('price', $('#editProductPrice').val());
+            formData.append('discount_price', $('#editProductDiscount').val());
+            formData.append('stock', $('#editProductStock').val());
+            formData.append('size', $('#editProductSize').val());
+            formData.append('color', $('#editProductColor').val());
+            formData.append('gender', $('#editProductGender').val());
+            formData.append('occasion', $('#editProductOccasion').val());
+            formData.append('description', $('#editProductDescription').val());
+            
+            // Add new image files
+            const imageFiles = $('#editProductImages')[0].files;
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append('new_images[]', imageFiles[i]);
+            }
+            
+            $.ajax({
+                url: '../api/admin.php?action=update_product',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal and refresh products
+                        $('#editProductModal').modal('hide');
+                        loadProducts();
+                        
+                        alert('Product updated successfully');
+                    } else {
+                        alert(response.message || 'Error updating product');
+                    }
+                }
+            });
+        }
+        
+        function deleteProduct(productId) {
+            if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+                $.ajax({
+                    url: '../api/admin.php?action=delete_product',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { id: productId },
+                    success: function(response) {
+                        if (response.success) {
+                            loadProducts();
+                            alert('Product deleted successfully');
+                        } else {
+                            alert(response.message || 'Error deleting product');
+                        }
+                    }
+                });
+            }
+        }
+        
+        function removePreviewImage(button) {
+            $(button).parent().remove();
+            
+            // Update the file input to remove the corresponding file
+            const files = $('#productImages')[0].files;
+            const dataTransfer = new DataTransfer();
+            
+            for (let i = 0; i < files.length; i++) {
+                if (i !== $(button).parent().index()) {
+                    dataTransfer.items.add(files[i]);
+                }
+            }
+            
+            $('#productImages')[0].files = dataTransfer.files;
+        }
+        
+        function removeProductImage(productId, imageName, button) {
+            if (confirm('Are you sure you want to delete this image?')) {
+                $.ajax({
+                    url: '../api/admin.php?action=remove_product_image',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        product_id: productId,
+                        image_name: imageName
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $(button).parent().remove();
+                            alert('Image removed successfully');
+                        } else {
+                            alert(response.message || 'Error removing image');
+                        }
+                    }
+                });
+            }
+        }
+        
+        function logoutAdmin() {
+            $.ajax({
+                url: '../api/auth.php?action=admin_logout',
+                type: 'POST',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = 'login.html';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

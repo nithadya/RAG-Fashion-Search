@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StyleMe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .image-upload-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .image-upload-container:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .image-upload-container.dragover {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+        .image-preview {
+            position: relative;
+            display: inline-block;
+        }
+        .image-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .image-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .upload-placeholder {
+            color: #6c757d;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+        }
+        .content-section {
+            min-height: calc(100vh - 56px);
+        }
+        .stats-card {
+            transition: transform 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.btn-group .dropdown-menu {
+    min-width: 160px;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="text-center text-white">
+            <div class="spinner-border mb-3" role="status"></div>
+            <div>Loading...</div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-gem me-2"></i>StyleMe Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i><span id="adminName">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar border-end shadow-sm">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active text-dark fw-semibold" href="#" onclick="showSection('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#" onclick="showSection('products')">
+                                <i class="fas fa-box me-2"></i>Products
+                                <span class="badge bg-primary ms-2" id="productCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#" onclick="showSection('categories')">
+                                <i class="fas fa-tags me-2"></i>Categories
+                                <span class="badge bg-success ms-2" id="categoryCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#" onclick="showSection('orders')">
+                                <i class="fas fa-shopping-cart me-2"></i>Orders
+                                <span class="badge bg-warning ms-2" id="orderCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#" onclick="showSection('users')">
+                                <i class="fas fa-users me-2"></i>Users
+                                <span class="badge bg-info ms-2" id="userCount">0</span>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="content-section">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2 fw-bold"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshDashboard()">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100 border-start border-primary border-4 stats-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Products</div>
+                                            <div class="h4 mb-0 fw-bold text-dark" id="totalProducts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-box fa-2x text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100 border-start border-success border-4 stats-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Total Orders</div>
+                                            <div class="h4 mb-0 fw-bold text-dark" id="totalOrders">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-shopping-cart fa-2x text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100 border-start border-info border-4 stats-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Total Users</div>
+                                            <div class="h4 mb-0 fw-bold text-dark" id="totalUsers">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100 border-start border-warning border-4 stats-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Revenue</div>
+                                            <div class="h4 mb-0 fw-bold text-dark" id="totalRevenue">Rs. 0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-muted"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 fw-bold text-primary">Recent Orders</h6>
+                            <a href="#" class="btn btn-sm btn-outline-primary" onclick="showSection('orders')">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order #</th>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrdersBody">
+                                        <!-- Data loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div id="products-section" class="content-section d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2 fw-bold"><i class="fas fa-box me-2"></i>Products</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button class="btn btn-outline-secondary btn-sm me-2" onclick="exportProducts()">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <button class="btn btn-primary" onclick="showAddProductModal()">
+                                <i class="fas fa-plus me-2"></i>Add Product
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="productsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTableBody">
+                                        <!-- Data loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories Section -->
+                <div id="categories-section" class="content-section d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2 fw-bold"><i class="fas fa-tags me-2"></i>Categories</h1>
+                        <button class="btn btn-primary" onclick="showAddCategoryModal()">
+                            <i class="fas fa-plus me-2"></i>Add Category
+                        </button>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Slug</th>
+                                            <th>Description</th>
+                                            <th>Products Count</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="categoriesTableBody">
+                                        <!-- Data loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div id="orders-section" class="content-section d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2 fw-bold"><i class="fas fa-shopping-cart me-2"></i>Orders</h1>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order #</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+                                        <!-- Data loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Users Section -->
+<div id="users-section" class="content-section d-none">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 fw-bold"><i class="fas fa-users me-2"></i>User Management</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-outline-secondary btn-sm me-2" onclick="exportUsers()">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <button class="btn btn-primary" onclick="showAddUserModal()">
+                <i class="fas fa-plus me-2"></i>Add User
+            </button>
+        </div>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Users</div>
+                            <div class="h5 mb-0 fw-bold" id="totalUsersCount">0</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-users fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-success border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Active Users</div>
+                            <div class="h5 mb-0 fw-bold" id="activeUsersCount">0</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-user-check fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Admin Users</div>
+                            <div class="h5 mb-0 fw-bold" id="adminUsersCount">0</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-user-shield fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">New This Month</div>
+                            <div class="h5 mb-0 fw-bold" id="newUsersCount">0</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-user-plus fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h6 class="m-0 fw-bold text-primary">All Users</h6>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" placeholder="Search users..." id="userSearchInput">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Phone</th>
+                            <th>Orders</th>
+                            <th>Total Spent</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Data loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalTitle">Add User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId" name="userId">
+                    
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-3">Basic Information</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userName" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="userName" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userEmail" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="userEmail" name="email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userPassword" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="userPassword" name="password">
+                            <div class="form-text">Leave blank to keep current password (for updates)</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userRole" class="form-label">Role *</label>
+                            <select class="form-select" id="userRole" name="role" required>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-3">Contact Information</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userPhone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="userPhone" name="phone">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="userCity" name="city">
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="userAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="userAddress" name="address" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="userPostalCode" class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="userPostalCode" name="postal_code">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveUser()">
+                    <i class="fas fa-save me-1"></i>Save User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailsModalBody">
+                <!-- User details loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <!-- Feedback Section -->
+                <div id="feedback-section" class="content-section d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2 fw-bold"><i class="fas fa-comments me-2"></i>Feedback</h1>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Type</th>
+                                            <th>Message</th>
+                                            <th>Rating</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="feedbackTableBody">
+                                        <!-- Data loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm" enctype="multipart/form-data">
+                        <input type="hidden" id="productId" name="productId">
+                        
+                        <!-- Image Upload Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Product Images</h6>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Primary Image *</label>
+                                        <div class="image-upload-container" onclick="document.getElementById('productImageFile1').click()">
+                                            <input type="file" id="productImageFile1" name="image_files[]" accept="image/*" style="display: none;" onchange="previewImage(this, 'preview1')">
+                                            <div class="image-preview" id="preview1">
+                                                <div class="upload-placeholder">
+                                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                                                    <p class="text-muted mt-2 mb-0">Click to upload primary image</p>
+                                                    <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Secondary Image</label>
+                                        <div class="image-upload-container" onclick="document.getElementById('productImageFile2').click()">
+                                            <input type="file" id="productImageFile2" name="image_files[]" accept="image/*" style="display: none;" onchange="previewImage(this, 'preview2')">
+                                            <div class="image-preview" id="preview2">
+                                                <div class="upload-placeholder">
+                                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                                                    <p class="text-muted mt-2 mb-0">Click to upload secondary image</p>
+                                                    <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Additional Image</label>
+                                        <div class="image-upload-container" onclick="document.getElementById('productImageFile3').click()">
+                                            <input type="file" id="productImageFile3" name="image_files[]" accept="image/*" style="display: none;" onchange="previewImage(this, 'preview3')">
+                                            <div class="image-preview" id="preview3">
+                                                <div class="upload-placeholder">
+                                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                                                    <p class="text-muted mt-2 mb-0">Click to upload additional image</p>
+                                                    <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Basic Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productName" class="form-label">Product Name *</label>
+                                <input type="text" class="form-control" id="productName" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productCategory" class="form-label">Category *</label>
+                                <select class="form-select" id="productCategory" name="category_id" required>
+                                    <!-- Options loaded via AJAX -->
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="productDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="productDescription" name="description" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Inventory -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Pricing & Inventory</h6>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="productPrice" class="form-label">Price (Rs.) *</label>
+                                <input type="number" class="form-control" id="productPrice" name="price" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="productDiscountPrice" class="form-label">Discount Price (Rs.)</label>
+                                <input type="number" class="form-control" id="productDiscountPrice" name="discount_price" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="productStock" class="form-label">Stock Quantity *</label>
+                                <input type="number" class="form-control" id="productStock" name="stock" min="0" required>
+                            </div>
+                        </div>
+
+                        <!-- Product Attributes -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Product Attributes</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productGender" class="form-label">Gender</label>
+                                <select class="form-select" id="productGender" name="gender">
+                                    <option value="Unisex">Unisex</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productBrand" class="form-label">Brand</label>
+                                <input type="text" class="form-control" id="productBrand" name="brand">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productSize" class="form-label">Available Sizes</label>
+                                <input type="text" class="form-control" id="productSize" name="size" placeholder="S,M,L,XL">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productColor" class="form-label">Available Colors</label>
+                                <input type="text" class="form-control" id="productColor" name="color" placeholder="Red,Blue,Green">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productOccasion" class="form-label">Occasion</label>
+                                <input type="text" class="form-control" id="productOccasion" name="occasion">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">
+                        <i class="fas fa-save me-1"></i>Save Product
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalTitle">Add Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm" enctype="multipart/form-data">
+                        <input type="hidden" id="categoryId" name="categoryId">
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Category Image</label>
+                                <div class="image-upload-container" onclick="document.getElementById('categoryImageFile').click()">
+                                    <input type="file" id="categoryImageFile" name="image_file" accept="image/*" style="display: none;" onchange="previewImage(this, 'categoryPreview')">
+                                    <div class="image-preview" id="categoryPreview">
+                                        <div class="upload-placeholder">
+                                            <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                                            <p class="text-muted mt-2 mb-0">Click to upload image</p>
+                                            <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label for="categoryName" class="form-label">Category Name *</label>
+                                        <input type="text" class="form-control" id="categoryName" name="name" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="categorySlug" class="form-label">Slug *</label>
+                                        <input type="text" class="form-control" id="categorySlug" name="slug" required>
+                                        <div class="form-text">URL-friendly version (auto-generated)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="categoryDescription" name="description" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                        <i class="fas fa-save me-1"></i>Save Category
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="orderModalBody">
+                    <!-- Order details loaded via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="userModalBody">
+                    <!-- User details loaded via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Global variables
+        let currentSection = 'dashboard';
+        let allProducts = [];
+        let allCategories = [];
+        let allUsers = [];
+        let allFeedback = [];
+
+        // Initialize dashboard
+        $(document).ready(function() {
+            checkAuth();
+            loadDashboardData();
+            
+            // Auto-generate slug from category name
+            $('#categoryName').on('input', function() {
+                const slug = $(this).val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                $('#categorySlug').val(slug);
+            });
+        });
+
+        // Authentication check
+        function checkAuth() {
+            $.ajax({
+                url: '../api/auth.php?action=check',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.success || !response.loggedIn || response.user.role !== 'admin') {
+                        window.location.href = '../login.html';
+                    } else {
+                        $('#adminName').text(response.user.name);
+                    }
+                },
+                error: function() {
+                    window.location.href = '../login.html';
+                }
+            });
+        }
+
+        // Section navigation
+        function showSection(section) {
+            $('.content-section').addClass('d-none');
+            $('#' + section + '-section').removeClass('d-none');
+            
+            $('.nav-link').removeClass('active').addClass('text-dark');
+            $(`a[onclick="showSection('${section}')"]`).addClass('active').removeClass('text-dark');
+            
+            currentSection = section;
+            
+            // Load section data
+            switch(section) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'categories':
+                    loadCategories();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'feedback':
+                    loadFeedback();
+                    break;
+            }
+        }
+
+        // Dashboard data loading
+        function loadDashboardData() {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php?action=dashboard_stats',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        updateDashboardStats(response.stats);
+                        updateSidebarCounts(response.stats);
+                        loadRecentOrders();
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load dashboard data', 'error');
+                }
+            });
+        }
+
+        function updateDashboardStats(stats) {
+            $('#totalProducts').text(stats.total_products);
+            $('#totalOrders').text(stats.total_orders);
+            $('#totalUsers').text(stats.total_users);
+            $('#totalRevenue').text('Rs. ' + parseFloat(stats.total_revenue).toLocaleString());
+        }
+
+        function updateSidebarCounts(stats) {
+            $('#productCount').text(stats.total_products);
+            $('#categoryCount').text(stats.total_categories || 0);
+            $('#orderCount').text(stats.total_orders);
+            $('#userCount').text(stats.total_users);
+            $('#feedbackCount').text(stats.total_feedback || 0);
+        }
+
+        function loadRecentOrders() {
+            $.ajax({
+                url: '../api/admin.php?action=recent_orders',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        let html = '';
+                        response.orders.forEach(order => {
+                            html += `
+                                <tr>
+                                    <td><strong>${order.order_number}</strong></td>
+                                    <td>${order.customer_name}</td>
+                                    <td><strong>Rs. ${parseFloat(order.total_amount).toFixed(2)}</strong></td>
+                                    <td><span class="badge bg-${getStatusColor(order.status)}">${order.status}</span></td>
+                                    <td>${formatDate(order.created_at)}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewOrder(${order.id})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        $('#recentOrdersBody').html(html);
+                    }
+                }
+            });
+        }
+
+        // Products management
+        function loadProducts() {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php?action=get_products',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        allProducts = response.products;
+                        displayProducts(allProducts);
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load products', 'error');
+                }
+            });
+        }
+
+        function displayProducts(products) {
+            let html = '';
+            products.forEach(product => {
+                html += `
+                    <tr>
+                        <td>
+                            <img src="../assets/uploads/${product.image1}" width="50" height="50" 
+                                 class="rounded object-fit-cover" alt="${product.name}"
+                                 onerror="this.src='../assets/images/placeholder.jpg'">
+                        </td>
+                        <td>
+                            <strong>${product.name}</strong>
+                            ${product.brand ? `<br><small class="text-muted">${product.brand}</small>` : ''}
+                        </td>
+                        <td><span class="badge bg-secondary">${product.category_name}</span></td>
+                        <td>
+                            <strong>Rs. ${parseFloat(product.price).toFixed(2)}</strong>
+                            ${product.discount_price ? `<br><small class="text-success">Rs. ${parseFloat(product.discount_price).toFixed(2)}</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge ${getStockBadgeClass(product.stock)}">${product.stock}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-${product.stock > 0 ? 'success' : 'danger'}">
+                                ${product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${product.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="duplicateProduct(${product.id})" title="Duplicate">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.id})" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#productsTableBody').html(html);
+        }
+
+        // Product CRUD operations
+        function showAddProductModal() {
+        $('#productModalTitle').text('Add New Product');
+        $('#productForm')[0].reset();
+        $('#productId').val('');
+        clearImagePreviews();
+        
+        // Load category options
+        showLoading();
+        $.ajax({
+            url: '../api/admin.php?action=get_categories',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    let options = '<option value="">Select Category</option>';
+                    response.categories.forEach(category => {
+                        options += `<option value="${category.id}">${category.name}</option>`;
+                    });
+                    $('#productCategory').html(options);
+                    $('#productModal').modal('show');
+                } else {
+                    showAlert('Failed to load categories', 'error');
+                }
+            },
+            error: function() {
+                hideLoading();
+                showAlert('Failed to load categories', 'error');
+            }
+        });
+    }
+
+        function loadCategoryOptions() {
+            $.ajax({
+                url: '../api/admin.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        let options = '<option value="">Select Category</option>';
+                        response.categories.forEach(category => {
+                            options += `<option value="${category.id}">${category.name}</option>`;
+                        });
+                        $('#productCategory').html(options);
+                    }
+                }
+            });
+        }
+
+        function editProduct(id) {
+            showLoading();
+            $.ajax({
+                url: `../api/admin.php?action=get_product&id=${id}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        const product = response.product;
+                        $('#productModalTitle').text('Edit Product');
+                        $('#productId').val(product.id);
+                        $('#productName').val(product.name);
+                        $('#productCategory').val(product.category_id);
+                        $('#productPrice').val(product.price);
+                        $('#productDiscountPrice').val(product.discount_price);
+                        $('#productStock').val(product.stock);
+                        $('#productGender').val(product.gender);
+                        $('#productSize').val(product.size);
+                        $('#productColor').val(product.color);
+                        $('#productBrand').val(product.brand);
+                        $('#productOccasion').val(product.occasion);
+                        $('#productDescription').val(product.description);
+
+                        // Load existing images
+                        if (product.image1) {
+                            showExistingImage('preview1', product.image1);
+                        }
+                        if (product.image2) {
+                            showExistingImage('preview2', product.image2);
+                        }
+                        if (product.image3) {
+                            showExistingImage('preview3', product.image3);
+                        }
+
+                        loadCategoryOptions();
+                        $('#productModal').modal('show');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load product details', 'error');
+                }
+            });
+        }
+
+        function saveProduct() {
+        const form = $('#productForm')[0];
+        const formData = new FormData(form);
+        
+        // Add action
+        const action = $('#productId').val() ? 'update_product' : 'add_product';
+        formData.append('action', action);
+
+        // Validate required fields
+        if (!$('#productName').val().trim()) {
+            showAlert('Product name is required', 'error');
+            return;
+        }
+        if (!$('#productCategory').val()) {
+            showAlert('Category is required', 'error');
+            return;
+        }
+        if (!$('#productPrice').val() || parseFloat($('#productPrice').val()) <= 0) {
+            showAlert('Valid price is required', 'error');
+            return;
+        }
+        if (!$('#productStock').val() || parseInt($('#productStock').val()) < 0) {
+            showAlert('Valid stock quantity is required', 'error');
+            return;
+        }
+
+        // Check if at least one image is uploaded for new products
+        if (!$('#productId').val() && $('#productImageFile1')[0].files.length === 0) {
+            showAlert('At least one product image is required', 'error');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '../api/admin.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    $('#productModal').modal('hide');
+                    loadProducts();
+                    showAlert('Product saved successfully!', 'success');
+                } else {
+                    showAlert(response.message || 'Failed to save product', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                showAlert('Error: ' + error, 'error');
+            }
+        });
+    }
+
+        function deleteProduct(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will permanently delete the product.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    $.ajax({
+                        url: '../api/admin.php',
+                        type: 'POST',
+                        data: {action: 'delete_product', id: id},
+                        dataType: 'json',
+                        success: function(response) {
+                            hideLoading();
+                            if (response.success) {
+                                loadProducts();
+                                showAlert('Product deleted successfully!', 'success');
+                            } else {
+                                showAlert(response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            hideLoading();
+                            showAlert('Failed to delete product', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function duplicateProduct(id) {
+            showLoading();
+            $.ajax({
+                url: `../api/admin.php?action=get_product&id=${id}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        const product = response.product;
+                        $('#productModalTitle').text('Duplicate Product');
+                        $('#productId').val(''); // Clear ID for new product
+                        $('#productName').val(product.name + ' (Copy)');
+                        $('#productCategory').val(product.category_id);
+                        $('#productPrice').val(product.price);
+                        $('#productDiscountPrice').val(product.discount_price);
+                        $('#productStock').val(0); // Reset stock
+                        $('#productGender').val(product.gender);
+                        $('#productSize').val(product.size);
+                        $('#productColor').val(product.color);
+                        $('#productBrand').val(product.brand);
+                        $('#productOccasion').val(product.occasion);
+                        $('#productDescription').val(product.description);
+
+                        clearImagePreviews();
+                        loadCategoryOptions();
+                        $('#productModal').modal('show');
+                    }
+                }
+            });
+        }
+
+        // Categories management
+        function loadCategories() {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        allCategories = response.categories;
+                        displayCategories(allCategories);
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load categories', 'error');
+                }
+            });
+        }
+
+        function displayCategories(categories) {
+            let html = '';
+            categories.forEach(category => {
+                html += `
+                    <tr>
+                        <td>
+                            ${category.image ? 
+                                `<img src="../assets/uploads/${category.image}" width="50" height="50" class="rounded" onerror="this.src='../assets/images/placeholder.jpg'">` : 
+                                '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:50px;height:50px;"><i class="fas fa-image text-muted"></i></div>'
+                            }
+                        </td>
+                        <td><strong>${category.name}</strong></td>
+                        <td><code>${category.slug}</code></td>
+                        <td>${category.description || '-'}</td>
+                        <td><span class="badge bg-primary">${category.product_count || 0}</span></td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editCategory(${category.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${category.id})" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#categoriesTableBody').html(html);
+        }
+
+        function showAddCategoryModal() {
+            $('#categoryModalTitle').text('Add Category');
+            $('#categoryForm')[0].reset();
+            $('#categoryId').val('');
+            clearImagePreviews();
+            $('#categoryModal').modal('show');
+        }
+
+        function editCategory(id) {
+            showLoading();
+            $.ajax({
+                url: `../api/admin.php?action=get_category&id=${id}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        const category = response.category;
+                        $('#categoryModalTitle').text('Edit Category');
+                        $('#categoryId').val(category.id);
+                        $('#categoryName').val(category.name);
+                        $('#categorySlug').val(category.slug);
+                        $('#categoryDescription').val(category.description);
+
+                        // Show existing image
+                        if (category.image) {
+                            showExistingImage('categoryPreview', category.image);
+                        } else {
+                            clearImagePreviews();
+                        }
+
+                        $('#categoryModal').modal('show');
+                    }
+                }
+            });
+        }
+
+        function saveCategory() {
+        const form = $('#categoryForm')[0];
+        const formData = new FormData(form);
+        
+        const action = $('#categoryId').val() ? 'update_category' : 'add_category';
+        formData.append('action', action);
+
+        // Validate required fields
+        if (!$('#categoryName').val().trim()) {
+            showAlert('Category name is required', 'error');
+            return;
+        }
+        if (!$('#categorySlug').val().trim()) {
+            showAlert('Category slug is required', 'error');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '../api/admin.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    $('#categoryModal').modal('hide');
+                    loadCategories();
+                    showAlert('Category saved successfully!', 'success');
+                } else {
+                    showAlert(response.message || 'Failed to save category', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                showAlert('Error: ' + error, 'error');
+            }
+        });
+    }
+
+        function deleteCategory(id) {
+            Swal.fire({
+                title: 'Delete Category?',
+                text: "This will remove the category if there are no products in it.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    $.ajax({
+                        url: '../api/admin.php',
+                        type: 'POST',
+                        data: {action: 'delete_category', id: id},
+                        dataType: 'json',
+                        success: function(response) {
+                            hideLoading();
+                            if (response.success) {
+                                loadCategories();
+                                showAlert('Category deleted successfully!', 'success');
+                            } else {
+                                showAlert(response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            hideLoading();
+                            showAlert('Failed to delete category', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Orders management
+        function loadOrders() {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php?action=get_orders',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        displayOrders(response.orders);
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load orders', 'error');
+                }
+            });
+        }
+
+        function displayOrders(orders) {
+            let html = '';
+            orders.forEach(order => {
+                html += `
+                    <tr>
+                        <td><strong>${order.order_number}</strong></td>
+                        <td>${order.customer_name}</td>
+                        <td>${order.item_count} items</td>
+                        <td><strong>Rs. ${parseFloat(order.total_amount).toFixed(2)}</strong></td>
+                        <td>
+                            <select class="form-select form-select-sm" onchange="updateOrderStatus(${order.id}, this.value)">
+                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td>${formatDate(order.created_at)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info" onclick="viewOrder(${order.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#ordersTableBody').html(html);
+        }
+
+        function updateOrderStatus(orderId, status) {
+            $.ajax({
+                url: '../api/admin.php',
+                type: 'POST',
+                data: { action: 'update_order_status', order_id: orderId, status: status },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('Order status updated successfully!', 'success');
+                    } else {
+                        showAlert(response.message, 'error');
+                    }
+                }
+            });
+        }
+
+        function viewOrder(id) {
+            showLoading();
+            $.ajax({
+                url: `../api/admin.php?action=get_order_details&id=${id}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        displayOrderDetails(response.order);
+                        $('#orderModal').modal('show');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load order details', 'error');
+                }
+            });
+        }
+
+        function displayOrderDetails(order) {
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <tr>
+                        <td>
+                            <img src="../assets/uploads/${item.image}" width="40" height="40" class="rounded">
+                        </td>
+                        <td>${item.product_name}</td>
+                        <td>${item.quantity}</td>
+                        <td>Rs. ${parseFloat(item.price).toFixed(2)}</td>
+                        <td>Rs. ${(item.quantity * item.price).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            const orderDetailsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Order Information</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Order Number:</strong></td><td>${order.order_number}</td></tr>
+                            <tr><td><strong>Date:</strong></td><td>${formatDate(order.created_at)}</td></tr>
+                            <tr><td><strong>Status:</strong></td><td><span class="badge bg-${getStatusColor(order.status)}">${order.status}</span></td></tr>
+                            <tr><td><strong>Payment Method:</strong></td><td>${order.payment_method}</td></tr>
+                            <tr><td><strong>Total Amount:</strong></td><td><strong>Rs. ${parseFloat(order.total_amount).toFixed(2)}</strong></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Customer Information</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Name:</strong></td><td>${order.customer_name}</td></tr>
+                            <tr><td><strong>Email:</strong></td><td>${order.customer_email}</td></tr>
+                            <tr><td><strong>Phone:</strong></td><td>${order.contact_number}</td></tr>
+                            <tr><td><strong>Address:</strong></td><td>${order.shipping_address}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h6 class="fw-bold">Order Items</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            $('#orderModalBody').html(orderDetailsHtml);
+        }
+
+        // Users management
+        function loadUsers() {
+    showLoading();
+    $.ajax({
+        url: '../api/admin.php?action=get_users',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                allUsers = response.users;
+                displayUsers(allUsers);
+                updateUserStatistics(allUsers);
+            }
+        },
+        error: function() {
+            hideLoading();
+            showAlert('Failed to load users', 'error');
+        }
+    });
+}
+
+        function displayUsers(users) {
+    let html = '';
+    users.forEach(user => {
+        const statusBadge = user.status === 'inactive' ? 
+            '<span class="badge bg-danger">Inactive</span>' : 
+            '<span class="badge bg-success">Active</span>';
+            
+        html += `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle bg-primary text-white me-2">
+                            ${user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <strong>${user.name}</strong>
+                    </div>
+                </td>
+                <td>${user.email}</td>
+                <td>
+                    <span class="badge bg-${user.role === 'admin' ? 'danger' : 'primary'}">
+                        ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    </span>
+                </td>
+                <td>${user.phone || '-'}</td>
+                <td><span class="badge bg-info">${user.order_count || 0}</span></td>
+                <td><strong>Rs. ${parseFloat(user.total_spent || 0).toFixed(2)}</strong></td>
+                <td>${statusBadge}</td>
+                <td>${formatDate(user.created_at)}</td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-info" onclick="viewUserDetails(${user.id})" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="More Actions">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="resetPassword(${user.id})">
+                                    <i class="fas fa-key me-2"></i>Reset Password
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="toggleUserStatus(${user.id}, '${user.status === 'active' ? 'inactive' : 'active'}')">
+                                    <i class="fas fa-${user.status === 'active' ? 'ban' : 'check'} me-2"></i>
+                                    ${user.status === 'active' ? 'Deactivate' : 'Activate'}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteUser(${user.id})">
+                                    <i class="fas fa-trash me-2"></i>Delete User
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    $('#usersTableBody').html(html);
+}
+
+
+        function updateUserStatistics(users) {
+    const totalUsers = users.length;
+    const activeUsers = users.filter(u => u.status !== 'inactive').length;
+    const adminUsers = users.filter(u => u.role === 'admin').length;
+    
+    // Calculate new users this month
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const newUsers = users.filter(u => {
+        const userDate = new Date(u.created_at);
+        return userDate.getMonth() === currentMonth && userDate.getFullYear() === currentYear;
+    }).length;
+    
+    $('#totalUsersCount').text(totalUsers);
+    $('#activeUsersCount').text(activeUsers);
+    $('#adminUsersCount').text(adminUsers);
+    $('#newUsersCount').text(newUsers);
+}
+
+function showAddUserModal() {
+    $('#userModalTitle').text('Add New User');
+    $('#userForm')[0].reset();
+    $('#userId').val('');
+    $('#userPassword').prop('required', true);
+    $('#userModal').modal('show');
+}
+
+function editUser(id) {
+    showLoading();
+    $.ajax({
+        url: `../api/admin.php?action=get_user&id=${id}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                const user = response.user;
+                $('#userModalTitle').text('Edit User');
+                $('#userId').val(user.id);
+                $('#userName').val(user.name);
+                $('#userEmail').val(user.email);
+                $('#userPassword').val('').prop('required', false);
+                $('#userRole').val(user.role);
+                $('#userPhone').val(user.phone);
+                $('#userAddress').val(user.address);
+                $('#userCity').val(user.city);
+                $('#userPostalCode').val(user.postal_code);
+                $('#userModal').modal('show');
+            }
+        },
+        error: function() {
+            hideLoading();
+            showAlert('Failed to load user details', 'error');
+        }
+    });
+}
+
+        function saveUser() {
+    const form = $('#userForm')[0];
+    const formData = new FormData(form);
+    
+    const action = $('#userId').val() ? 'update_user' : 'add_user';
+    formData.append('action', action);
+
+    // Validation
+    if (!$('#userName').val().trim()) {
+        showAlert('Name is required', 'error');
+        return;
+    }
+    if (!$('#userEmail').val().trim()) {
+        showAlert('Email is required', 'error');
+        return;
+    }
+    if (!$('#userId').val() && !$('#userPassword').val()) {
+        showAlert('Password is required for new users', 'error');
+        return;
+    }
+
+    showLoading();
+    $.ajax({
+        url: '../api/admin.php',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                $('#userModal').modal('hide');
+                loadUsers();
+                showAlert('User saved successfully!', 'success');
+            } else {
+                showAlert(response.message || 'Failed to save user', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            showAlert('Error: ' + error, 'error');
+        }
+    });
+}
+
+
+
+function deleteUser(id) {
+    Swal.fire({
+        title: 'Delete User?',
+        text: "This action cannot be undone. All user data will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete user!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php',
+                type: 'POST',
+                data: {action: 'delete_user', id: id},
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        loadUsers();
+                        showAlert('User deleted successfully!', 'success');
+                    } else {
+                        showAlert(response.message, 'error');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to delete user', 'error');
+                }
+            });
+        }
+    });
+}
+
+function viewUserDetails(id) {
+    showLoading();
+    $.ajax({
+        url: `../api/admin.php?action=get_user&id=${id}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                displayUserDetails(response.user);
+                $('#userDetailsModal').modal('show');
+            }
+        },
+        error: function() {
+            hideLoading();
+            showAlert('Failed to load user details', 'error');
+        }
+    });
+}
+
+
+
+
+
+        function viewUser(id) {
+            showLoading();
+            $.ajax({
+                url: `../api/admin.php?action=get_user_details&id=${id}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        displayUserDetails(response.user);
+                        $('#userModal').modal('show');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load user details', 'error');
+                }
+            });
+        }
+
+        function displayUserDetails(user) {
+    const userDetailsHtml = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="fw-bold">Personal Information</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Name:</strong></td><td>${user.name}</td></tr>
+                    <tr><td><strong>Email:</strong></td><td>${user.email}</td></tr>
+                    <tr><td><strong>Role:</strong></td><td><span class="badge bg-${user.role === 'admin' ? 'danger' : 'primary'}">${user.role}</span></td></tr>
+                    <tr><td><strong>Phone:</strong></td><td>${user.phone || 'Not provided'}</td></tr>
+                    <tr><td><strong>Status:</strong></td><td><span class="badge bg-${user.status === 'active' ? 'success' : 'danger'}">${user.status || 'Active'}</span></td></tr>
+                    <tr><td><strong>Joined:</strong></td><td>${formatDate(user.created_at)}</td></tr>
+                    <tr><td><strong>Last Updated:</strong></td><td>${formatDate(user.updated_at)}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6 class="fw-bold">Activity Summary</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Total Orders:</strong></td><td>${user.order_count || 0}</td></tr>
+                    <tr><td><strong>Wishlist Items:</strong></td><td>${user.wishlist_count || 0}</td></tr>
+                    <tr><td><strong>Cart Items:</strong></td><td>${user.cart_count || 0}</td></tr>
+                    <tr><td><strong>Total Spent:</strong></td><td>Rs. ${parseFloat(user.total_spent || 0).toFixed(2)}</td></tr>
+                    <tr><td><strong>Last Order:</strong></td><td>${user.last_order_date ? formatDate(user.last_order_date) : 'Never'}</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h6 class="fw-bold">Address Information</h6>
+            <div class="bg-light p-3 rounded">
+                <p class="mb-1"><strong>Address:</strong> ${user.address || 'Not provided'}</p>
+                <p class="mb-1"><strong>City:</strong> ${user.city || 'Not provided'}</p>
+                <p class="mb-0"><strong>Postal Code:</strong> ${user.postal_code || 'Not provided'}</p>
+            </div>
+        </div>
+    `;
+    
+    $('#userDetailsModalBody').html(userDetailsHtml);
+}
+
+
+function toggleUserStatus(id, status) {
+    const action = status === 'active' ? 'activate' : 'deactivate';
+    
+    Swal.fire({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} User?`,
+        text: `Are you sure you want to ${action} this user?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: status === 'active' ? '#28a745' : '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${action}!`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php',
+                type: 'POST',
+                data: {action: 'toggle_user_status', id: id, status: status},
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        loadUsers();
+                        showAlert(`User ${action}d successfully!`, 'success');
+                    } else {
+                        showAlert(response.message, 'error');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert(`Failed to ${action} user`, 'error');
+                }
+            });
+        }
+    });
+}
+
+function resetPassword(id) {
+    Swal.fire({
+        title: 'Reset User Password',
+        html: `
+            <div class="mb-3">
+                <label for="newPassword" class="form-label">New Password</label>
+                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password" minlength="6">
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Reset Password',
+        confirmButtonColor: '#dc3545',
+        preConfirm: () => {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!newPassword) {
+                Swal.showValidationMessage('Please enter a new password');
+                return false;
+            }
+            if (newPassword.length < 6) {
+                Swal.showValidationMessage('Password must be at least 6 characters');
+                return false;
+            }
+            if (newPassword !== confirmPassword) {
+                Swal.showValidationMessage('Passwords do not match');
+                return false;
+            }
+            
+            return newPassword;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php',
+                type: 'POST',
+                data: {action: 'reset_user_password', id: id, new_password: result.value},
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        showAlert('Password reset successfully!', 'success');
+                    } else {
+                        showAlert(response.message, 'error');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to reset password', 'error');
+                }
+            });
+        }
+    });
+}
+
+function searchUsers() {
+    const searchTerm = $('#userSearchInput').val().toLowerCase();
+    const filteredUsers = allUsers.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm) ||
+        user.role.toLowerCase().includes(searchTerm)
+    );
+    displayUsers(filteredUsers);
+}
+
+// Add search on enter key
+$('#userSearchInput').on('keypress', function(e) {
+    if (e.which === 13) {
+        searchUsers();
+    }
+});
+
+        // Feedback management
+        function loadFeedback() {
+            showLoading();
+            $.ajax({
+                url: '../api/admin.php?action=get_feedback',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.success) {
+                        allFeedback = response.feedback;
+                        displayFeedback(allFeedback);
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showAlert('Failed to load feedback', 'error');
+                }
+            });
+        }
+
+        function displayFeedback(feedback) {
+            let html = '';
+            feedback.forEach(item => {
+                html += `
+                    <tr>
+                        <td><strong>${item.user_name || 'Anonymous'}</strong></td>
+                        <td><span class="badge bg-info">${item.type}</span></td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px;" title="${item.message}">
+                                ${item.message}
+                            </div>
+                        </td>
+                        <td>
+                            ${item.rating ? 
+                                '<span class="text-warning">' + '★'.repeat(item.rating) + '</span>' : 
+                                '<span class="text-muted">-</span>'
+                            }
+                        </td>
+                        <td>${formatDate(item.created_at)}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-info" onclick="viewFeedback(${item.id})" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteFeedback(${item.id})" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#feedbackTableBody').html(html);
+        }
+
+        function viewFeedback(id) {
+            const feedback = allFeedback.find(f => f.id == id);
+            if (feedback) {
+                Swal.fire({
+                    title: 'Feedback Details',
+                    html: `
+                        <div class="text-start">
+                            <p><strong>User:</strong> ${feedback.user_name || 'Anonymous'}</p>
+                            <p><strong>Type:</strong> <span class="badge bg-info">${feedback.type}</span></p>
+                            <p><strong>Rating:</strong> ${feedback.rating ? '★'.repeat(feedback.rating) : 'No rating'}</p>
+                            <p><strong>Date:</strong> ${formatDate(feedback.created_at)}</p>
+                            <hr>
+                            <p><strong>Message:</strong></p>
+                            <div class="bg-light p-3 rounded">${feedback.message}</div>
+                        </div>
+                    `,
+                    width: '600px',
+                    showCloseButton: true,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        function deleteFeedback(id) {
+            Swal.fire({
+                title: 'Delete Feedback?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    $.ajax({
+                        url: '../api/admin.php',
+                        type: 'POST',
+                        data: {action: 'delete_feedback', id: id},
+                        dataType: 'json',
+                        success: function(response) {
+                            hideLoading();
+                            if (response.success) {
+                                loadFeedback();
+                                showAlert('Feedback deleted successfully!', 'success');
+                            } else {
+                                showAlert(response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            hideLoading();
+                            showAlert('Failed to delete feedback', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Image handling functions
+        function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const file = input.files[0];
+        
+        if (file) {
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showAlert('Image size must be less than 5MB', 'error');
+                input.value = '';
+                return;
+            }
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showAlert('Please select a valid image file (JPEG, PNG, GIF, WebP)', 'error');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                        <button type="button" class="image-remove" onclick="removeImage('${previewId}', '${input.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+
+        function showExistingImage(previewId, imageName) {
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = `
+                <div class="position-relative">
+                    <img src="../assets/uploads/${imageName}" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                    <span class="badge bg-success position-absolute top-0 start-0">Current</span>
+                </div>
+            `;
+        }
+
+        function removeImage(previewId, inputId) {
+            document.getElementById(previewId).innerHTML = `
+                <div class="upload-placeholder">
+                    <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                    <p class="text-muted mt-2 mb-0">Click to upload image</p>
+                    <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                </div>
+            `;
+            document.getElementById(inputId).value = '';
+        }
+
+        function clearImagePreviews() {
+            ['preview1', 'preview2', 'preview3', 'categoryPreview'].forEach(function(id) {
+                const preview = document.getElementById(id);
+                if (preview) {
+                    preview.innerHTML = `
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                            <p class="text-muted mt-2 mb-0">Click to upload image</p>
+                            <small class="text-muted">JPG, PNG, GIF up to 5MB</small>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Clear file inputs
+            ['productImageFile1', 'productImageFile2', 'productImageFile3', 'categoryImageFile'].forEach(function(id) {
+                const input = document.getElementById(id);
+                if (input) input.value = '';
+            });
+        }
+
+        // Export functions
+        function exportProducts() {
+            window.open('../api/admin.php?action=export_products', '_blank');
+        }
+
+        function exportOrders() {
+            window.open('../api/admin.php?action=export_orders', '_blank');
+        }
+
+        function exportUsers() {
+            window.open('../api/admin.php?action=export_users', '_blank');
+        }
+
+        // Utility functions
+        function showAlert(message, type) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: type === 'success' ? 'success' : 'error',
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        function showLoading() {
+            $('#loadingOverlay').removeClass('d-none');
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').addClass('d-none');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Pending': return 'warning';
+                case 'Processing': return 'info';
+                case 'Shipped': return 'primary';
+                case 'Delivered': return 'success';
+                case 'Cancelled': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        function getStockBadgeClass(stock) {
+            if (stock === 0) return 'bg-danger';
+            if (stock < 5) return 'bg-warning text-dark';
+            return 'bg-success';
+        }
+
+        function refreshDashboard() {
+            loadDashboardData();
+            showAlert('Dashboard refreshed!', 'success');
+        }
+
+        // Logout function
+        function logout() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out of the admin panel.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '../api/auth.php',
+                        type: 'POST',
+                        data: { action: 'logout' },
+                        dataType: 'json',
+                        success: function() {
+                            window.location.href = '../login.html';
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

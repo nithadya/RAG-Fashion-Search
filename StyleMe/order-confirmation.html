@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - StyleMe</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/order-confirmation.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="confirmation-container">
+                    <div class="success-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2 class="mb-3">Order Placed Successfully!</h2>
+                    <p class="lead mb-4">Thank you for your order. We'll send you a confirmation email shortly.</p>
+                    
+                    <div class="order-info mb-4">
+                        <h5>Order Number: <span class="text-primary" id="orderNumber">Loading...</span></h5>
+                        <p class="text-muted">Please save this order number for tracking</p>
+                    </div>
+                    
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="orders.html" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i>View Orders
+                        </a>
+                        <a href="products.html" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="order-details" id="orderDetails">
+                    <!-- Order details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNumber = urlParams.get('order');
+            
+            if (orderNumber) {
+                $('#orderNumber').text(orderNumber);
+                loadOrderDetails(orderNumber);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+        
+        function loadOrderDetails(orderNumber) {
+            $.ajax({
+                url: `api/orders.php?action=track&order_number=${orderNumber}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        renderOrderDetails(response.order);
+                    }
+                }
+            });
+        }
+        
+        function renderOrderDetails(order) {
+            $('#orderDetails').html(`
+                <h5 class="mb-3">Order Details</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> ${order.status}</p>
+                        <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                        <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Shipping Address:</strong></p>
+                        <p class="text-muted">${order.shipping_address}</p>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+</body>
+</html>
