@@ -67,12 +67,20 @@ def get_llm_provider():
 def create_llm(provider):
     """Create LLM instance based on provider"""
     if provider == 'openai':
-        return ChatOpenAI(
-            model=os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo'),
-            temperature=float(os.getenv('TEMPERATURE', 0)),
-            max_tokens=int(os.getenv('MAX_TOKENS', 150)),
-            api_key=os.getenv('OPENAI_API_KEY')
-        )
+        # Prepare OpenAI configuration
+        openai_config = {
+            'model': os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo'),
+            'temperature': float(os.getenv('TEMPERATURE', 0)),
+            'max_tokens': int(os.getenv('MAX_TOKENS', 150)),
+            'api_key': os.getenv('OPENAI_API_KEY')
+        }
+        
+        # Add project ID if provided (for sk-proj-... keys)
+        project_id = os.getenv('OPENAI_PROJECT_ID')
+        if project_id and project_id.strip():
+            openai_config['project'] = project_id.strip()
+        
+        return ChatOpenAI(**openai_config)
     elif provider == 'groq':
         return ChatGroq(
             model=os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant'),
@@ -96,10 +104,17 @@ def initialize_rag_system():
         
         # Load embeddings model (currently using OpenAI for both providers)
         # Note: You could switch to local embeddings for Groq if needed
-        embeddings = OpenAIEmbeddings(
-            model=os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
-            api_key=os.getenv('OPENAI_API_KEY')
-        )
+        embeddings_config = {
+            'model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            'api_key': os.getenv('OPENAI_API_KEY')
+        }
+        
+        # Add project ID for embeddings if provided (for sk-proj-... keys)
+        project_id = os.getenv('OPENAI_PROJECT_ID')
+        if project_id and project_id.strip():
+            embeddings_config['project'] = project_id.strip()
+        
+        embeddings = OpenAIEmbeddings(**embeddings_config)
         
         # Load the local FAISS vector store
         vector_store_path = os.getenv('VECTOR_STORE_PATH', 'faiss_index')

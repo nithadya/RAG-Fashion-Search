@@ -88,6 +88,42 @@ GROQ_LLM_MODEL=llama-3.1-8b-instant   # or llama-3.1-70b-versatile
 OPENAI_EMBEDDING_MODEL=text-embedding-ada-002
 ```
 
+### 🔑 OpenAI API Key Types
+
+OpenAI offers two types of API keys:
+
+**1. Legacy Keys (`sk-...`)**
+- Format: `sk-1234567890abcdef...`
+- Scoped to your entire organization
+- Still supported but being phased out
+
+**2. Project Keys (`sk-proj-...`) - Recommended**
+- Format: `sk-proj-1234567890abcdef...`
+- Scoped to specific projects for better security
+- Better billing tracking and access control
+
+### Configuration for Project Keys
+
+If your API key starts with `sk-proj-`, you may need to specify the project ID:
+
+```bash
+# Your project-based API key
+OPENAI_API_KEY="sk-proj-your-actual-key-here"
+
+# Optional: Your project ID (recommended for sk-proj keys)
+OPENAI_PROJECT_ID="proj_your-project-id-here"
+```
+
+**To find your Project ID:**
+1. Go to: https://platform.openai.com/settings/organization/projects
+2. Copy your project ID (format: `proj_1234567890abcdef...`)
+
+**Benefits of Project Keys:**
+- ✅ Better security and access control
+- ✅ Clearer billing and usage tracking  
+- ✅ Separate rate limits per project
+- ✅ Future-proof (recommended by OpenAI)
+
 ### Available Groq Models
 
 | Model                     | Speed      | Quality    | Use Case                    |

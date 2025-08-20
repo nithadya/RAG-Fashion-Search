@@ -104,10 +104,18 @@ def create_vector_store():
 
     # Initialize OpenAI embeddings
     try:
-        embeddings = OpenAIEmbeddings(
-            model=os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
-            api_key=os.getenv('OPENAI_API_KEY')
-        )
+        embeddings_config = {
+            'model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            'api_key': os.getenv('OPENAI_API_KEY')
+        }
+        
+        # Add project ID if provided (for sk-proj-... keys)
+        project_id = os.getenv('OPENAI_PROJECT_ID')
+        if project_id and project_id.strip():
+            embeddings_config['project'] = project_id.strip()
+            print(f"🔑 Using OpenAI project: {project_id.strip()}")
+        
+        embeddings = OpenAIEmbeddings(**embeddings_config)
         print("✅ Initialized OpenAI embeddings (compatible with all LLM providers)")
     except Exception as e:
         print(f"❌ Failed to initialize embeddings: {e}")
