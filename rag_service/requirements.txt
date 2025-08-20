@@ -8,7 +8,11 @@ openai==1.7.0
 langchain==0.1.0
 langchain-openai==0.0.2
 langchain-community==0.0.10
+langchain-groq==0.0.1
 faiss-cpu==1.7.4
+
+# -- API Clients --
+groq==0.4.1
 
 # Additional utilities
 numpy==1.24.3

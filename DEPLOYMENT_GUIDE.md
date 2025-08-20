@@ -7,7 +7,7 @@ This implementation upgrades your StyleMe e-commerce platform with a state-of-th
 ## 🏗️ Architecture Overview
 
 ```
-📱 Frontend (HTML/JS) 
+📱 Frontend (HTML/JS)
     ↓
 🐘 PHP Backend (search.php)
     ↓
@@ -21,6 +21,7 @@ This implementation upgrades your StyleMe e-commerce platform with a state-of-th
 ### Step 1: Prerequisites
 
 ✅ **System Requirements:**
+
 - Python 3.8 or higher
 - MySQL server running
 - OpenAI API account and key
@@ -29,6 +30,7 @@ This implementation upgrades your StyleMe e-commerce platform with a state-of-th
 ### Step 2: Database Setup
 
 1. **Run the database upgrade script:**
+
 ```sql
 -- Execute this in your MySQL database
 SOURCE StyleMe/SQL/upgrade_for_langchain_rag.sql;
@@ -37,11 +39,13 @@ SOURCE StyleMe/SQL/upgrade_for_langchain_rag.sql;
 ### Step 3: Configure Environment
 
 1. **Navigate to the RAG service directory and configure:**
+
 ```bash
 cd rag_service
 ```
 
 2. **Edit the `.env` file:**
+
 ```env
 # Database Configuration
 DB_HOST=localhost
@@ -61,12 +65,14 @@ FLASK_DEBUG=True
 ### Step 4: Installation
 
 **For Windows:**
+
 ```batch
 # Run the automated setup
 setup_rag_service.bat
 ```
 
 **For Linux/Mac:**
+
 ```bash
 # Make scripts executable and run setup
 chmod +x setup_rag_service.sh start_rag_service.sh
@@ -74,6 +80,7 @@ chmod +x setup_rag_service.sh start_rag_service.sh
 ```
 
 **Manual Installation:**
+
 ```bash
 cd rag_service
 
@@ -97,6 +104,7 @@ python test_rag_service.py quick
 ### Step 5: Start the Service
 
 **Using Scripts:**
+
 ```batch
 # Windows
 start_rag_service.bat
@@ -106,6 +114,7 @@ start_rag_service.bat
 ```
 
 **Manual Start:**
+
 ```bash
 cd rag_service
 # Activate environment (as shown above)
@@ -115,25 +124,29 @@ python app.py
 ## 📊 Verification & Testing
 
 ### 1. Health Check
-Visit: `http://localhost:5000/` 
+
+Visit: `http://localhost:5000/`
 
 Expected response:
+
 ```json
 {
-    "status": "healthy",
-    "service": "StyleMe RAG Service",
-    "version": "2.0.0-langchain",
-    "rag_system": "initialized"
+  "status": "healthy",
+  "service": "StyleMe RAG Service",
+  "version": "2.0.0-langchain",
+  "rag_system": "initialized"
 }
 ```
 
 ### 2. Run Comprehensive Tests
+
 ```bash
 cd rag_service
 python test_rag_service.py
 ```
 
 ### 3. Test from PHP Frontend
+
 - Open your StyleMe website
 - Use the search functionality
 - Check for improved, more relevant results
@@ -142,14 +155,14 @@ python test_rag_service.py
 
 ### Environment Variables in `.env`:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OPENAI_API_KEY` | Your OpenAI API key | Required |
-| `EMBEDDING_MODEL` | OpenAI embedding model | text-embedding-ada-002 |
-| `LLM_MODEL` | OpenAI language model | gpt-3.5-turbo |
-| `MAX_RETRIEVED_DOCS` | Docs to retrieve per search | 20 |
-| `TEMPERATURE` | LLM creativity (0.0-1.0) | 0 |
-| `HISTORY_LIMIT` | User history to consider | 5 |
+| Variable             | Description                 | Default                |
+| -------------------- | --------------------------- | ---------------------- |
+| `OPENAI_API_KEY`     | Your OpenAI API key         | Required               |
+| `EMBEDDING_MODEL`    | OpenAI embedding model      | text-embedding-ada-002 |
+| `LLM_MODEL`          | OpenAI language model       | gpt-3.5-turbo          |
+| `MAX_RETRIEVED_DOCS` | Docs to retrieve per search | 20                     |
+| `TEMPERATURE`        | LLM creativity (0.0-1.0)    | 0                      |
+| `HISTORY_LIMIT`      | User history to consider    | 5                      |
 
 ### Fine-tuning Search Results:
 
@@ -160,11 +173,13 @@ python test_rag_service.py
 ## 📈 Performance & Monitoring
 
 ### Expected Performance:
+
 - **Search latency:** 200-500ms per query
 - **Throughput:** 50+ concurrent requests
 - **Accuracy:** 85%+ relevant results
 
 ### Monitoring:
+
 - Service logs: Console output from `app.py`
 - Database logs: Check `search_logs` table
 - Vector store stats: `GET /vector-store/stats`
@@ -172,8 +187,9 @@ python test_rag_service.py
 ## 🔍 How It Works
 
 ### 1. **User Search Flow:**
+
 ```
-User types "red dress for party" 
+User types "red dress for party"
     ↓
 PHP search.php receives request
     ↓
@@ -191,6 +207,7 @@ Results displayed to user
 ```
 
 ### 2. **LangChain Components:**
+
 - **Embeddings:** Convert text to vectors for similarity search
 - **Vector Store:** FAISS index for fast retrieval
 - **Retriever:** Fetches relevant product documents
@@ -202,18 +219,21 @@ Results displayed to user
 ### Regular Tasks:
 
 1. **Update Vector Store** (after adding new products):
+
 ```bash
 cd rag_service
 python create_vector_store.py
 ```
 
 2. **Monitor Performance:**
+
 ```sql
 -- Check search analytics
 SELECT * FROM search_logs ORDER BY created_at DESC LIMIT 100;
 ```
 
 3. **Update Dependencies** (monthly):
+
 ```bash
 pip install --upgrade -r requirements.txt
 ```
@@ -223,32 +243,38 @@ pip install --upgrade -r requirements.txt
 ### Common Issues:
 
 ❌ **"Vector store not found"**
+
 ```bash
 cd rag_service
 python create_vector_store.py
 ```
 
 ❌ **OpenAI API errors**
+
 - Verify API key in `.env`
 - Check account credits/limits
 - Test with: `curl -H "Authorization: Bearer YOUR_KEY" https://api.openai.com/v1/models`
 
 ❌ **Database connection failed**
+
 - Verify MySQL is running
 - Check credentials in `.env`
 - Test connection manually
 
 ❌ **Poor search results**
+
 - Recreate vector store: `python create_vector_store.py`
 - Adjust `MAX_RETRIEVED_DOCS` in `.env`
 - Fine-tune prompt in `app.py`
 
 ❌ **Service won't start**
+
 - Check Python version: `python --version`
 - Verify all dependencies: `pip list`
 - Check port availability: `netstat -an | findstr :5000`
 
 ### Debug Mode:
+
 ```bash
 # Set debug mode in .env
 FLASK_DEBUG=True
@@ -260,7 +286,9 @@ python app.py
 ## 🚀 Advanced Features
 
 ### Custom Retrievers:
+
 Modify the retriever in `app.py` for advanced filtering:
+
 ```python
 # Price-based retrieval
 retriever = vector_store.as_retriever(
@@ -270,14 +298,17 @@ retriever = vector_store.as_retriever(
 ```
 
 ### Multi-language Support:
+
 Add language detection and translation before embedding.
 
 ### Real-time Updates:
+
 Implement webhooks to update vector store when products change.
 
 ## 📋 API Documentation
 
 ### Search Endpoint
+
 ```http
 POST http://localhost:5000/search
 Content-Type: application/json
@@ -289,14 +320,15 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
-    "success": true,
-    "product_ids": [4, 15, 23],
-    "query": "blue jeans for women",
-    "results_count": 3,
-    "processing_time": 0.245,
-    "history_considered": true
+  "success": true,
+  "product_ids": [4, 15, 23],
+  "query": "blue jeans for women",
+  "results_count": 3,
+  "processing_time": 0.245,
+  "history_considered": true
 }
 ```
 
@@ -310,18 +342,21 @@ Content-Type: application/json
 ## 🌟 Benefits of This Implementation
 
 ### For Users:
+
 - 🎯 More accurate search results
 - 📚 Personalized recommendations based on history
 - ⚡ Faster response times
 - 🔍 Natural language search capabilities
 
 ### For Developers:
+
 - 🧩 Modular, maintainable code with LangChain
 - 📊 Built-in analytics and monitoring
 - 🔧 Easy configuration and tuning
 - 🚀 Scalable architecture
 
 ### For Business:
+
 - 💰 Improved conversion rates
 - 📈 Better user engagement
 - 🎯 Data-driven insights
@@ -345,7 +380,7 @@ Your implementation is successful when:
 ✅ Web search returns relevant results  
 ✅ Response times are <1 second  
 ✅ No errors in service logs  
-✅ Database logs show RAG queries  
+✅ Database logs show RAG queries
 
 ---
 

@@ -12,8 +12,16 @@ def create_vector_store():
     """
     Create FAISS vector store from product data in MySQL database.
     This replaces the traditional approach of storing embeddings in the database.
+    Note: Currently uses OpenAI embeddings regardless of LLM provider choice.
     """
     print("🚀 Starting vector store creation process...")
+    print("📝 Note: Using OpenAI embeddings (works with both OpenAI and Groq LLM providers)")
+    
+    # Check if OpenAI API key is available for embeddings
+    if not os.getenv('OPENAI_API_KEY'):
+        print("❌ OPENAI_API_KEY is required for embeddings generation")
+        print("💡 Please set your OpenAI API key in the .env file")
+        return False
     
     # Database connection
     try:
@@ -97,9 +105,10 @@ def create_vector_store():
     # Initialize OpenAI embeddings
     try:
         embeddings = OpenAIEmbeddings(
-            model=os.getenv('EMBEDDING_MODEL', 'text-embedding-ada-002')
+            model=os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            api_key=os.getenv('OPENAI_API_KEY')
         )
-        print("✅ Initialized OpenAI embeddings")
+        print("✅ Initialized OpenAI embeddings (compatible with all LLM providers)")
     except Exception as e:
         print(f"❌ Failed to initialize embeddings: {e}")
         print("💡 Make sure your OPENAI_API_KEY is set correctly in .env file")

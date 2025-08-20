@@ -40,48 +40,48 @@ try {
     ]);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30); // 30 second timeout
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 second connection timeout
-    
+
     $ragResponse = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
     curl_close($ch);
-    
+
     if ($curlError) {
         throw new Exception("cURL Error: " . $curlError);
     }
-    
+
     if ($httpCode !== 200) {
         throw new Exception("RAG Service returned HTTP " . $httpCode);
     }
-    
+
     $ragData = json_decode($ragResponse, true);
-    
+
     if (!$ragData || !isset($ragData['success']) || !$ragData['success']) {
         throw new Exception("Invalid response from RAG service");
     }
-    
+
     $productIds = $ragData['product_ids'] ?? [];
     $processingTime = microtime(true) - $startTime;
-    
+
     // If RAG service returned product IDs, fetch full product details
     if (!empty($productIds)) {
         // Create placeholders for IN clause
         $placeholders = str_repeat('?,', count($productIds) - 1) . '?';
-        
+
         // Fetch products maintaining the order returned by RAG
         $sql = "SELECT p.*, c.name as category_name 
                 FROM products p 
                 LEFT JOIN categories c ON p.category_id = c.id 
                 WHERE p.id IN ($placeholders) AND p.stock > 0
                 ORDER BY FIELD(p.id, $placeholders)";
-        
+
         // Duplicate product IDs for both IN clause and ORDER BY FIELD
         $params = array_merge($productIds, $productIds);
         $results = $db->fetchAll($sql, $params);
     } else {
         $results = [];
     }
-    
+
     // Enhanced response with RAG metadata
     echo json_encode([
         'success' => true,
@@ -93,17 +93,17 @@ try {
             'processing_time' => round($processingTime, 3),
             'rag_processing_time' => $ragData['processing_time'] ?? null,
             'history_considered' => $ragData['history_considered'] ?? false,
-            'service_version' => '2.0-langchain'
+            'provider_used' => $ragData['provider_used'] ?? 'unknown',
+            'service_version' => $ragData['service_version'] ?? '2.1.0-multi-provider'
         ]
     ]);
-    
 } catch (Exception $e) {
     // Fallback to traditional database search if RAG service is unavailable
     error_log("RAG Service Error: " . $e->getMessage());
-    
+
     // Traditional search as fallback
     $enhancedQuery = enhanceSearchQuery($query);
-    
+
     // Log the search for analytics
     if ($userId > 0) {
         $db->query(
@@ -111,7 +111,7 @@ try {
             [$userId, $query, $enhancedQuery, round(microtime(true) - $startTime, 3)]
         );
     }
-    
+
     // Fallback search
     $sql = "SELECT p.*, c.name as category_name 
             FROM products p 
@@ -122,10 +122,10 @@ try {
               CASE WHEN p.discount_price > 0 THEN 1 ELSE 0 END DESC,
               p.created_at DESC
             LIMIT 15";
-            
+
     $searchTerm = "%$enhancedQuery%";
     $results = $db->fetchAll($sql, [$searchTerm, $searchTerm, $searchTerm]);
-    
+
     echo json_encode([
         'success' => true,
         'results' => $results,
@@ -134,9 +134,9 @@ try {
         'fallback_mode' => true,
         'error_message' => 'Using fallback search - RAG service unavailable',
         'rag_metadata' => [
+            'provider_used' => 'fallback',
             'service_version' => '1.0-fallback',
             'processing_time' => round(microtime(true) - $startTime, 3)
         ]
     ]);
 }
-?>

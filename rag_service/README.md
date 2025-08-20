@@ -1,17 +1,25 @@
-# StyleMe RAG Service with LangChain Framework
+# StyleMe RAG Service with Multi-Provider Support (OpenAI + Groq)
 
 ## Overview
 
-This is an upgraded RAG (Retrieval-Augmented Generation) microservice for the StyleMe e-commerce platform, built using the LangChain framework. The service provides intelligent product search capabilities by combining semantic search with large language models.
+This is an upgraded RAG (Retrieval-Augmented Generation) microservice for the StyleMe e-commerce platform, built using the LangChain framework with **multi-provider support**. The service now supports both **OpenAI** and **Groq** as LLM providers, offering flexibility in terms of performance, cost, and reliability.
 
 ## Key Features
 
-- **LangChain Framework**: Built using LangChain Expression Language (LCEL) for modular and maintainable RAG pipelines
-- **FAISS Vector Store**: High-performance vector storage for fast similarity searches
-- **OpenAI Integration**: Uses OpenAI's embedding and language models
-- **User History Tracking**: Considers user search history for personalized recommendations
-- **Performance Monitoring**: Built-in logging and analytics
-- **RESTful API**: Clean HTTP API for integration with web applications
+- **🤖 Multi-Provider Support**: Choose between OpenAI and Groq LLMs
+- **⚡ Automatic Fallback**: Seamlessly switches providers if one is unavailable
+- **🧩 LangChain Framework**: Built using LangChain Expression Language (LCEL)
+- **📊 FAISS Vector Store**: High-performance vector storage for fast similarity searches
+- **👤 User History Tracking**: Considers user search history for personalized recommendations
+- **📈 Performance Monitoring**: Built-in logging and analytics with provider information
+- **🔄 RESTful API**: Clean HTTP API for integration with web applications
+
+## Provider Options
+
+| Provider   | Speed      | Cost       | Quality    | Best For                    |
+| ---------- | ---------- | ---------- | ---------- | --------------------------- |
+| **OpenAI** | ⭐⭐⭐     | ⭐⭐       | ⭐⭐⭐⭐⭐ | Production, High Quality    |
+| **Groq**   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐   | High Volume, Cost-Effective |
 
 ## Architecture
 
@@ -71,6 +79,7 @@ python create_vector_store.py
 ```
 
 This will:
+
 - Connect to your MySQL database
 - Fetch all active products
 - Generate embeddings using OpenAI
@@ -87,12 +96,15 @@ The service will start on `http://localhost:5000` by default.
 ## API Endpoints
 
 ### Health Check
+
 ```http
 GET /
 ```
+
 Returns service status and health information.
 
 ### Search Products
+
 ```http
 POST /search
 Content-Type: application/json
@@ -104,21 +116,24 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
-    "success": true,
-    "product_ids": [3, 10, 15],
-    "query": "red dress for party",
-    "results_count": 3,
-    "processing_time": 0.245,
-    "history_considered": true
+  "success": true,
+  "product_ids": [3, 10, 15],
+  "query": "red dress for party",
+  "results_count": 3,
+  "processing_time": 0.245,
+  "history_considered": true
 }
 ```
 
 ### Vector Store Statistics
+
 ```http
 GET /vector-store/stats
 ```
+
 Returns information about the loaded vector store.
 
 ## Testing
@@ -147,6 +162,7 @@ The existing `search.php` file will work with this new service without any chang
 ## Monitoring & Analytics
 
 The service automatically logs:
+
 - Search queries and results
 - Processing times
 - User search patterns
@@ -169,13 +185,16 @@ Key environment variables in `.env`:
 ### Common Issues
 
 1. **Vector store not found**
+
    - Run `python create_vector_store.py` to create it
 
 2. **OpenAI API errors**
+
    - Verify your API key in `.env`
    - Check your OpenAI account has sufficient credits
 
 3. **Database connection issues**
+
    - Verify MySQL is running
    - Check database credentials in `.env`
 
@@ -211,6 +230,7 @@ The LangChain framework makes it easy to add new features:
 ### Contributing
 
 When contributing to this service:
+
 1. Follow the existing code structure
 2. Add appropriate error handling
 3. Update tests for new features
@@ -219,6 +239,7 @@ When contributing to this service:
 ## Support
 
 For issues and questions:
+
 1. Check the troubleshooting section
 2. Review the test output
 3. Examine service logs

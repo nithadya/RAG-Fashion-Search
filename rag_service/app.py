@@ -11,6 +11,14 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
+# Groq imports
+try:
+    from langchain_groq import ChatGroq
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
+    print("⚠️ Groq not available. Install with: pip install langchain-groq groq")
+
 # Load environment variables
 load_dotenv()
 
@@ -29,17 +37,68 @@ DB_CONFIG = {
 vector_store = None
 retriever = None
 rag_chain = None
+current_provider = None
+
+def get_llm_provider():
+    """Determine which LLM provider to use based on configuration"""
+    provider = os.getenv('LLM_PROVIDER', 'openai').lower()
+    
+    if provider == 'groq' and not GROQ_AVAILABLE:
+        print("⚠️ Groq requested but not available, falling back to OpenAI")
+        provider = 'openai'
+    
+    # Verify API keys
+    if provider == 'openai' and not os.getenv('OPENAI_API_KEY'):
+        if os.getenv('GROQ_API_KEY') and GROQ_AVAILABLE:
+            print("⚠️ OpenAI key not found, switching to Groq")
+            provider = 'groq'
+        else:
+            raise ValueError("No valid API key found for any provider")
+    
+    if provider == 'groq' and not os.getenv('GROQ_API_KEY'):
+        if os.getenv('OPENAI_API_KEY'):
+            print("⚠️ Groq key not found, switching to OpenAI")
+            provider = 'openai'
+        else:
+            raise ValueError("No valid API key found for any provider")
+    
+    return provider
+
+def create_llm(provider):
+    """Create LLM instance based on provider"""
+    if provider == 'openai':
+        return ChatOpenAI(
+            model=os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo'),
+            temperature=float(os.getenv('TEMPERATURE', 0)),
+            max_tokens=int(os.getenv('MAX_TOKENS', 150)),
+            api_key=os.getenv('OPENAI_API_KEY')
+        )
+    elif provider == 'groq':
+        return ChatGroq(
+            model=os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant'),
+            temperature=float(os.getenv('TEMPERATURE', 0)),
+            max_tokens=int(os.getenv('MAX_TOKENS', 150)),
+            groq_api_key=os.getenv('GROQ_API_KEY')
+        )
+    else:
+        raise ValueError(f"Unsupported provider: {provider}")
 
 def initialize_rag_system():
     """Initialize the LangChain RAG system components"""
-    global vector_store, retriever, rag_chain
+    global vector_store, retriever, rag_chain, current_provider
     
     try:
         print("🚀 Initializing RAG system...")
         
-        # Load embeddings model
+        # Determine provider
+        current_provider = get_llm_provider()
+        print(f"🤖 Using LLM provider: {current_provider.upper()}")
+        
+        # Load embeddings model (currently using OpenAI for both providers)
+        # Note: You could switch to local embeddings for Groq if needed
         embeddings = OpenAIEmbeddings(
-            model=os.getenv('EMBEDDING_MODEL', 'text-embedding-ada-002')
+            model=os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            api_key=os.getenv('OPENAI_API_KEY')
         )
         
         # Load the local FAISS vector store
@@ -60,15 +119,30 @@ def initialize_rag_system():
             search_kwargs={'k': max_docs}
         )
         
-        # Initialize the LLM
-        model = ChatOpenAI(
-            model=os.getenv('LLM_MODEL', 'gpt-3.5-turbo'),
-            temperature=float(os.getenv('TEMPERATURE', 0)),
-            max_tokens=int(os.getenv('MAX_TOKENS', 150))
-        )
+        # Initialize the LLM based on provider
+        model = create_llm(current_provider)
         
-        # Define the RAG prompt template
-        template = """You are a helpful fashion assistant for StyleMe e-commerce store. Based on the retrieved product information and the user's search history, provide relevant product recommendations.
+        # Define the RAG prompt template (optimized for both providers)
+        if current_provider == 'groq':
+            # Groq models often work better with more structured prompts
+            template = """You are a helpful fashion assistant for StyleMe e-commerce store. Analyze the context and provide relevant product recommendations.
+
+PRODUCT CONTEXT:
+{context}
+
+USER SEARCH HISTORY:
+{history}
+
+CURRENT QUERY: {question}
+
+TASK: Return only a comma-separated list of the most relevant product IDs (numbers only) from the context above. Consider the user's query and search history to provide personalized recommendations. Maximum 10 product IDs, ordered by relevance.
+
+RESPONSE FORMAT: Only product IDs separated by commas (example: 12, 45, 8)
+
+Product IDs:"""
+        else:
+            # OpenAI optimized prompt
+            template = """You are a helpful fashion assistant for StyleMe e-commerce store. Based on the retrieved product information and the user's search history, provide relevant product recommendations.
 
 CONTEXT (Product Information):
 {context}
@@ -105,7 +179,7 @@ Product IDs:"""
             | StrOutputParser()
         )
         
-        print("✅ RAG system initialized successfully!")
+        print(f"✅ RAG system initialized successfully with {current_provider.upper()}!")
         return True
         
     except Exception as e:
@@ -191,11 +265,19 @@ def log_search(user_id, query, results_count, processing_time, enhanced_query=No
 @app.route('/')
 def health_check():
     """Health check endpoint"""
+    provider_info = {
+        'current_provider': current_provider or 'not_initialized',
+        'openai_available': bool(os.getenv('OPENAI_API_KEY')),
+        'groq_available': bool(os.getenv('GROQ_API_KEY')) and GROQ_AVAILABLE,
+        'groq_sdk_installed': GROQ_AVAILABLE
+    }
+    
     return jsonify({
         'status': 'healthy',
         'service': 'StyleMe RAG Service',
-        'version': '2.0.0-langchain',
-        'rag_system': 'initialized' if rag_chain else 'not_initialized'
+        'version': '2.1.0-multi-provider',
+        'rag_system': 'initialized' if rag_chain else 'not_initialized',
+        'provider_info': provider_info
     })
 
 @app.route('/search', methods=['POST'])
@@ -268,14 +350,16 @@ def handle_search():
         # Log the search for analytics
         log_search(user_id, query, len(product_ids), processing_time, result_str)
         
-        # Return results
+        # Return results with provider information
         return jsonify({
             'success': True,
             'product_ids': product_ids,
             'query': query,
             'results_count': len(product_ids),
             'processing_time': processing_time,
-            'history_considered': history != "No previous searches"
+            'history_considered': history != "No previous searches",
+            'provider_used': current_provider,
+            'service_version': '2.1.0-multi-provider'
         })
         
     except Exception as e:
@@ -285,7 +369,8 @@ def handle_search():
         
         return jsonify({
             'error': 'Internal server error during search processing',
-            'processing_time': processing_time
+            'processing_time': processing_time,
+            'provider_used': current_provider
         }), 500
 
 @app.route('/vector-store/stats', methods=['GET'])
@@ -302,12 +387,49 @@ def vector_store_stats():
         return jsonify({
             'total_vectors': total_vectors,
             'vector_store_type': 'FAISS',
-            'embedding_model': os.getenv('EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            'embedding_model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+            'llm_provider': current_provider,
+            'llm_model': get_current_model_name(),
             'status': 'ready'
         })
         
     except Exception as e:
         return jsonify({'error': f'Error getting vector store stats: {str(e)}'}), 500
+
+@app.route('/providers', methods=['GET'])
+def list_providers():
+    """List available providers and their status"""
+    providers = {
+        'openai': {
+            'available': bool(os.getenv('OPENAI_API_KEY')),
+            'models': {
+                'llm': os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo'),
+                'embeddings': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002')
+            }
+        },
+        'groq': {
+            'available': bool(os.getenv('GROQ_API_KEY')) and GROQ_AVAILABLE,
+            'sdk_installed': GROQ_AVAILABLE,
+            'models': {
+                'llm': os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant'),
+                'embeddings': 'Uses OpenAI embeddings'
+            }
+        }
+    }
+    
+    return jsonify({
+        'current_provider': current_provider,
+        'available_providers': providers,
+        'provider_priority': ['groq', 'openai'] if current_provider == 'groq' else ['openai', 'groq']
+    })
+
+def get_current_model_name():
+    """Get the current model name based on provider"""
+    if current_provider == 'openai':
+        return os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo')
+    elif current_provider == 'groq':
+        return os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant')
+    return 'unknown'
 
 @app.errorhandler(404)
 def not_found(error):
@@ -318,7 +440,8 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    print("🔧 Starting StyleMe RAG Service...")
+    print("🔧 Starting StyleMe Multi-Provider RAG Service...")
+    print(f"🤖 Available providers: OpenAI{'✓' if os.getenv('OPENAI_API_KEY') else '✗'}, Groq{'✓' if GROQ_AVAILABLE and os.getenv('GROQ_API_KEY') else '✗'}")
     
     # Initialize RAG system
     if not initialize_rag_system():
@@ -328,6 +451,8 @@ if __name__ == '__main__':
     print("🌟 RAG Service is ready to serve requests!")
     print(f"🔗 Health check: http://localhost:{os.getenv('FLASK_PORT', 5000)}/")
     print(f"🔍 Search endpoint: http://localhost:{os.getenv('FLASK_PORT', 5000)}/search")
+    print(f"🤖 Providers endpoint: http://localhost:{os.getenv('FLASK_PORT', 5000)}/providers")
+    print(f"⚡ Using {current_provider.upper()} as LLM provider")
     
     # Start Flask application
     app.run(

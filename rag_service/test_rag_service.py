@@ -19,13 +19,46 @@ def test_health_check():
         response = requests.get(f"{RAG_SERVICE_URL}/")
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Health check passed: {data}")
+            print(f"✅ Health check passed:")
+            print(f"   📊 Status: {data.get('status')}")
+            print(f"   🤖 Provider: {data.get('provider_info', {}).get('current_provider', 'unknown')}")
+            print(f"   🔧 Version: {data.get('version')}")
+            print(f"   🧠 RAG System: {data.get('rag_system')}")
+            
+            # Show provider availability
+            provider_info = data.get('provider_info', {})
+            print(f"   🔑 OpenAI Available: {provider_info.get('openai_available', False)}")
+            print(f"   ⚡ Groq Available: {provider_info.get('groq_available', False)}")
+            
             return True
         else:
             print(f"❌ Health check failed: {response.status_code}")
             return False
     except Exception as e:
         print(f"❌ Health check error: {e}")
+        return False
+
+def test_providers_endpoint():
+    """Test the providers information endpoint"""
+    print("\n🤖 Testing providers endpoint...")
+    try:
+        response = requests.get(f"{RAG_SERVICE_URL}/providers")
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ Providers info retrieved:")
+            print(f"   🎯 Current provider: {data.get('current_provider')}")
+            
+            providers = data.get('available_providers', {})
+            for name, info in providers.items():
+                status = "✅" if info.get('available') else "❌"
+                print(f"   {status} {name.upper()}: {info.get('models', {}).get('llm', 'unknown')}")
+            
+            return True
+        else:
+            print(f"❌ Providers endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Providers endpoint error: {e}")
         return False
 
 def test_vector_store_stats():
@@ -69,6 +102,7 @@ def test_search(query, expected_results=True):
             print(f"   ⏱️  Processing time: {data.get('processing_time', 0)}s")
             print(f"   🕐 Total request time: {end_time - start_time:.3f}s")
             print(f"   📚 History considered: {data.get('history_considered', False)}")
+            print(f"   🤖 Provider used: {data.get('provider_used', 'unknown').upper()}")
             
             if expected_results and data.get('results_count', 0) == 0:
                 print("⚠️  Warning: No results returned (might be expected)")
@@ -89,7 +123,7 @@ def test_search(query, expected_results=True):
 
 def run_comprehensive_tests():
     """Run a comprehensive set of tests"""
-    print("🚀 Starting comprehensive RAG service tests...\n")
+    print("🚀 Starting comprehensive Multi-Provider RAG service tests...\n")
     
     # Test cases
     test_queries = [
@@ -107,6 +141,7 @@ def run_comprehensive_tests():
     
     results = {
         'health_check': False,
+        'providers_check': False,
         'vector_store_stats': False,
         'successful_searches': 0,
         'total_searches': len(test_queries)
@@ -114,6 +149,7 @@ def run_comprehensive_tests():
     
     # Run tests
     results['health_check'] = test_health_check()
+    results['providers_check'] = test_providers_endpoint()
     results['vector_store_stats'] = test_vector_store_stats()
     
     print(f"\n🔍 Running {len(test_queries)} search tests...")
@@ -124,24 +160,25 @@ def run_comprehensive_tests():
         time.sleep(0.5)  # Small delay between requests
     
     # Summary
-    print("\n" + "="*60)
-    print("📋 TEST SUMMARY")
-    print("="*60)
+    print("\n" + "="*70)
+    print("📋 MULTI-PROVIDER RAG SERVICE TEST SUMMARY")
+    print("="*70)
     print(f"✅ Health Check: {'PASS' if results['health_check'] else 'FAIL'}")
-    print(f"✅ Vector Store Stats: {'PASS' if results['vector_store_stats'] else 'FAIL'}")
+    print(f"🤖 Providers Check: {'PASS' if results['providers_check'] else 'FAIL'}")
+    print(f"📊 Vector Store Stats: {'PASS' if results['vector_store_stats'] else 'FAIL'}")
     print(f"🔍 Search Tests: {results['successful_searches']}/{results['total_searches']} passed")
     
     success_rate = (results['successful_searches'] / results['total_searches']) * 100
-    print(f"📊 Success Rate: {success_rate:.1f}%")
+    print(f"� Success Rate: {success_rate:.1f}%")
     
     if success_rate >= 80:
-        print("🎉 RAG service is working well!")
+        print("🎉 Multi-Provider RAG service is working excellently!")
     elif success_rate >= 60:
         print("⚠️  RAG service has some issues but is functional")
     else:
         print("❌ RAG service needs attention")
     
-    print("="*60)
+    print("="*70)
 
 if __name__ == "__main__":
     print("StyleMe RAG Service Test Suite")
@@ -150,8 +187,9 @@ if __name__ == "__main__":
     # Quick test option
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "quick":
-        print("⚡ Running quick test...")
+        print("⚡ Running quick multi-provider test...")
         test_health_check()
+        test_providers_endpoint()
         test_search("men's shirt")
     else:
         run_comprehensive_tests()
