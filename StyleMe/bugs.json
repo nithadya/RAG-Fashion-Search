@@ -1,1 +1,90 @@
-[]
+[
+    {
+        "id": 1,
+        "title": "console.log('Sending order data:', formData); // Debug log",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\assets\\js\\checkout.js",
+        "line": 173,
+        "snippet": "console.log('Sending order data:', formData); // Debug log",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:44+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 2,
+        "title": "console.log('Order response:', response); // Debug log",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\assets\\js\\checkout.js",
+        "line": 182,
+        "snippet": "console.log('Order response:', response); // Debug log",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:44+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 3,
+        "title": "console.error('Order error:', {xhr, status, error}); // Debug log",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\assets\\js\\checkout.js",
+        "line": 193,
+        "snippet": "console.error('Order error:', {xhr, status, error}); // Debug log",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:44+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 4,
+        "title": "console.error('Response text:', xhr.responseText); // Debug log",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\assets\\js\\checkout.js",
+        "line": 194,
+        "snippet": "console.error('Response text:', xhr.responseText); // Debug log",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:44+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 5,
+        "title": "console.log('Add to cart clicked, Product ID:', productId); // Debug log",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\index.html",
+        "line": 1446,
+        "snippet": "console.log('Add to cart clicked, Product ID:', productId); // Debug log",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:44+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 6,
+        "title": "// Scans the repository for TODO/FIXME/BUG comments and adds them to bugs.json",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\scripts\\discover_bugs.php",
+        "line": 2,
+        "snippet": "// Scans the repository for TODO/FIXME/BUG comments and adds them to bugs.json",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:45+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 7,
+        "title": "$patterns = ['/TODO/i', '/FIXME/i', '/BUG[:\\s]/i'];",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\scripts\\discover_bugs.php",
+        "line": 5,
+        "snippet": "$patterns = ['/TODO/i', '/FIXME/i', '/BUG[:\\s]/i'];",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:45+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    },
+    {
+        "id": 8,
+        "title": "echo \"No bug references found in commit message.\\n\";",
+        "file": "D:\\Style-Me-RAG\\StyleMe\\scripts/..\\scripts\\update_bugs_from_commit.php",
+        "line": 21,
+        "snippet": "echo \"No bug references found in commit message.\\n\";",
+        "status": "open",
+        "created_at": "2025-08-20T20:19:45+02:00",
+        "closed_at": null,
+        "closed_by_commit": null
+    }
+]
