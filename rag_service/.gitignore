@@ -1,0 +1,115 @@
+# RAG Service Specific .gitignore
+# ---------------------------------
+# This file applies only to the rag_service directory.
+# (Global project ignores live in the repository root .gitignore)
+
+# Environment & Secrets
+.env
+.env.*
+!*.example
+secrets*/
+
+# Virtual Environments
+venv/
+.envdir/
+.python-version
+
+# Python Bytecode / Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+ruff_cache/
+
+# Build / Packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+wheels/
+
+# Logs & Temp
+logs/
+logs/**/*.log
+*.log
+tmp/
+temp/
+*.tmp
+*.temp
+profile_reports/
+
+# Test / Coverage
+.coverage
+.coverage.*
+htmlcov/
+pytestdebug.log
+nosetests.xml
+coverage.xml
+*.lcov
+.tox/
+.nox/
+
+# FAISS / Vector Store Artifacts
+faiss_index/
+*.index
+*.faiss
+*.pkl
+*.npz
+*.npy
+vector_store*/
+embeddings_cache*/
+
+# Model / Embedding Artifacts
+models/
+checkpoints/
+*.bin
+*.pt
+*.ckpt
+*.h5
+*.safetensors
+*.msgpack
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Data (uncomment if large local data sets should be excluded)
+# data/
+# datasets/
+# raw_data/
+# processed_data/
+
+# Cache / Temp Files from Scripts
+**/*_cache/
+**/cache/
+**/tmp/
+
+# IDE / Tooling (scoped for safety)
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+
+# Profiling & Benchmark Artifacts
+perf_profiles/
+benchmarks/
+
+# Misc
+*.bak
+*.old
+*.orig
+.DS_Store
+Thumbs.db
+
+# Allow placeholder keep files
+!**/.gitkeep
+
+# End of rag_service/.gitignore

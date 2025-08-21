@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Matching Scores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/match-scores.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Test Matching Scores Display</h2>
+        
+        <div class="mb-3">
+            <input type="text" id="intelligentSearchInput" class="form-control" placeholder="Search for products...">
+            <button id="testMatchingBtn" class="btn btn-primary mt-2">Test Matching Scores</button>
+        </div>
+        
+        <div id="searchResultsSummary"></div>
+        <div class="row" id="productList"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/intelligent-search.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            console.log("Test page loaded");
+            
+            // Test button click
+            $("#testMatchingBtn").click(function() {
+                console.log("🧪 Testing matching scores with sample data...");
+                
+                // Sample product data with matching scores
+                const testProducts = [
+                    {
+                        id: 1,
+                        name: "Men's Casual Shirt",
+                        price: "2500.00",
+                        discount_price: "1999.00",
+                        image1: "product_1751861652_686b4994b985f.jpg",
+                        category_name: "Men's Clothing",
+                        brand: "Cotton King",
+                        color: "Blue",
+                        similarity_score: 13,
+                        match_explanation: "Name matches: shirt • Description matches: shirt"
+                    }
+                ];
+                
+                // Force render with RAG source
+                if (ragSearch && ragSearch.renderEnhancedProducts) {
+                    console.log("✅ Calling renderEnhancedProducts...");
+                    ragSearch.renderEnhancedProducts(testProducts, [], "rag");
+                } else {
+                    console.error("❌ ragSearch not properly initialized or method missing");
+                    console.log("ragSearch object:", ragSearch);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

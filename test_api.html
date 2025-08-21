@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+
+<body>
+    <h1>API Test</h1>
+    <button onclick="testSavePreferences()">Test Save Preferences</button>
+    <button onclick="testGetProducts()">Test Get Products</button>
+    <div id="results"></div>
+
+    <script>
+        async function testSavePreferences() {
+            try {
+                const response = await fetch('http://localhost:8080/api/save_preferences.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 999999,
+                        preferences: {
+                            style: 'casual',
+                            color: 'blue',
+                            size: 'M',
+                            budget_max: 5000
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>Save Preferences Result:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `
+                    <h3>Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+
+        async function testGetProducts() {
+            try {
+                const response = await fetch('http://localhost:8080/api/products.php');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>Get Products Result:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `
+                    <h3>Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+
+</html>

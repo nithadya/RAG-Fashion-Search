@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Search Test - StyleMe</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .search-box:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        .preference-group {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .preference-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag {
+            background: #e9ecef;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .tag:hover {
+            background: #dee2e6;
+        }
+        .tag.active {
+            background: #007bff;
+            color: white;
+        }
+        .budget-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        .example-queries {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .example-queries h4 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .example-query {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            border-left: 3px solid #2196f3;
+        }
+        .example-query:hover {
+            background: #f5f5f5;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .product-id {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 RAG Search Test - StyleMe</h1>
+        
+        <!-- Simple Search -->
+        <div class="container">
+            <h2>Option 1: Simple Query Search</h2>
+            <p>Just enter your search query - no additional parameters needed!</p>
+            
+            <input type="text" id="simpleQuery" class="search-box" 
+                   placeholder="e.g., casual blue shirt for office">
+            <button class="btn" onclick="performSimpleSearch()">Search</button>
+            <button class="btn btn-secondary" onclick="clearResults('simpleResults')">Clear</button>
+            
+            <div class="example-queries">
+                <h4>📝 Try These Queries:</h4>
+                <div class="example-query" onclick="setQuery('simpleQuery', 'casual blue shirt for office')">
+                    casual blue shirt for office
+                </div>
+                <div class="example-query" onclick="setQuery('simpleQuery', 'comfortable formal dress for meetings')">
+                    comfortable formal dress for meetings
+                </div>
+                <div class="example-query" onclick="setQuery('simpleQuery', 'sports wear for gym under 3000')">
+                    sports wear for gym under 3000
+                </div>
+                <div class="example-query" onclick="setQuery('simpleQuery', 'party dress in red or black')">
+                    party dress in red or black
+                </div>
+            </div>
+            
+            <div id="simpleResults"></div>
+        </div>
+
+        <!-- Enhanced Search with Preferences -->
+        <div class="container">
+            <h2>Option 2: Enhanced Search with Preferences</h2>
+            <p>Add your preferences to get more personalized results!</p>
+            
+            <input type="text" id="enhancedQuery" class="search-box" 
+                   placeholder="e.g., comfortable shirt for office meetings">
+            
+            <!-- Style Preferences -->
+            <div class="preference-group">
+                <label>👔 Style Preferences:</label>
+                <div class="tags">
+                    <span class="tag" data-value="casual" onclick="toggleTag(this)">Casual</span>
+                    <span class="tag" data-value="formal" onclick="toggleTag(this)">Formal</span>
+                    <span class="tag" data-value="business" onclick="toggleTag(this)">Business</span>
+                    <span class="tag" data-value="party" onclick="toggleTag(this)">Party</span>
+                    <span class="tag" data-value="western" onclick="toggleTag(this)">Western</span>
+                    <span class="tag" data-value="ethnic" onclick="toggleTag(this)">Ethnic</span>
+                    <span class="tag" data-value="sports" onclick="toggleTag(this)">Sports</span>
+                    <span class="tag" data-value="trendy" onclick="toggleTag(this)">Trendy</span>
+                </div>
+            </div>
+
+            <!-- Color Preferences -->
+            <div class="preference-group">
+                <label>🎨 Color Preferences:</label>
+                <div class="tags">
+                    <span class="tag" data-value="black" onclick="toggleTag(this)">Black</span>
+                    <span class="tag" data-value="white" onclick="toggleTag(this)">White</span>
+                    <span class="tag" data-value="blue" onclick="toggleTag(this)">Blue</span>
+                    <span class="tag" data-value="red" onclick="toggleTag(this)">Red</span>
+                    <span class="tag" data-value="green" onclick="toggleTag(this)">Green</span>
+                    <span class="tag" data-value="navy" onclick="toggleTag(this)">Navy</span>
+                    <span class="tag" data-value="grey" onclick="toggleTag(this)">Grey</span>
+                    <span class="tag" data-value="brown" onclick="toggleTag(this)">Brown</span>
+                </div>
+            </div>
+
+            <!-- Budget Range -->
+            <div class="preference-group">
+                <label>💰 Budget Range:</label>
+                <span>Min: Rs.</span>
+                <input type="number" id="budgetMin" class="budget-input" value="1000" min="500" max="50000">
+                <span>Max: Rs.</span>
+                <input type="number" id="budgetMax" class="budget-input" value="10000" min="500" max="50000">
+            </div>
+
+            <!-- Occasion -->
+            <div class="preference-group">
+                <label>🎯 Occasion:</label>
+                <div class="tags">
+                    <span class="tag" data-value="office" onclick="toggleTag(this, true)">Office</span>
+                    <span class="tag" data-value="casual" onclick="toggleTag(this, true)">Daily Casual</span>
+                    <span class="tag" data-value="party" onclick="toggleTag(this, true)">Party</span>
+                    <span class="tag" data-value="wedding" onclick="toggleTag(this, true)">Wedding</span>
+                    <span class="tag" data-value="sports" onclick="toggleTag(this, true)">Sports</span>
+                    <span class="tag" data-value="travel" onclick="toggleTag(this, true)">Travel</span>
+                    <span class="tag" data-value="date" onclick="toggleTag(this, true)">Date</span>
+                    <span class="tag" data-value="meeting" onclick="toggleTag(this, true)">Meeting</span>
+                </div>
+            </div>
+
+            <button class="btn" onclick="performEnhancedSearch()">Enhanced Search</button>
+            <button class="btn btn-secondary" onclick="clearResults('enhancedResults')">Clear</button>
+            <button class="btn btn-secondary" onclick="resetPreferences()">Reset Preferences</button>
+            
+            <div id="enhancedResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle tag selection
+        function toggleTag(element, singleSelect = false) {
+            if (singleSelect) {
+                // For occasion - single selection
+                element.parentElement.querySelectorAll('.tag').forEach(tag => {
+                    tag.classList.remove('active');
+                });
+                element.classList.add('active');
+            } else {
+                // For multiple selection (style, color)
+                element.classList.toggle('active');
+            }
+        }
+
+        // Set query in input field
+        function setQuery(inputId, query) {
+            document.getElementById(inputId).value = query;
+        }
+
+        // Clear results
+        function clearResults(resultId) {
+            document.getElementById(resultId).innerHTML = '';
+        }
+
+        // Reset all preferences
+        function resetPreferences() {
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            document.getElementById('budgetMin').value = 1000;
+            document.getElementById('budgetMax').value = 10000;
+        }
+
+        // Get selected preferences
+        function getSelectedPreferences() {
+            const stylePrefs = Array.from(document.querySelectorAll('.preference-group:nth-of-type(1) .tag.active'))
+                                   .map(tag => tag.dataset.value);
+            const colorPrefs = Array.from(document.querySelectorAll('.preference-group:nth-of-type(2) .tag.active'))
+                                   .map(tag => tag.dataset.value);
+            const occasion = document.querySelector('.preference-group:nth-of-type(4) .tag.active')?.dataset.value || 'casual';
+            
+            return {
+                style_preferences: stylePrefs,
+                color_preferences: colorPrefs,
+                budget_min: parseInt(document.getElementById('budgetMin').value),
+                budget_max: parseInt(document.getElementById('budgetMax').value),
+                occasion: occasion
+            };
+        }
+
+        // Display results
+        function displayResults(containerId, data, type) {
+            const container = document.getElementById(containerId);
+            
+            if (data.success === false) {
+                container.innerHTML = `
+                    <div class="results error">
+                        <h4>❌ Error</h4>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Code:</strong> ${data.error_code || 'Unknown'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const productIds = data.product_ids || [];
+            const processingTime = data.processing_time || 0;
+            
+            container.innerHTML = `
+                <div class="results success">
+                    <h4>✅ ${type} Search Results</h4>
+                    <p><strong>Query:</strong> ${data.query}</p>
+                    <p><strong>Results:</strong> ${productIds.length} products found</p>
+                    <p><strong>Processing Time:</strong> ${processingTime}s</p>
+                    <p><strong>Provider:</strong> ${data.provider_used || 'Unknown'}</p>
+                    ${data.enhanced_query ? `<p><strong>Enhanced Query:</strong> ${data.enhanced_query}</p>` : ''}
+                    ${productIds.length > 0 ? `
+                        <div style="margin-top: 15px;">
+                            <strong>Product IDs:</strong><br>
+                            ${productIds.map(id => `<span class="product-id">${id}</span>`).join('')}
+                        </div>
+                    ` : '<p><em>No products found for this query.</em></p>'}
+                </div>
+            `;
+        }
+
+        // Simple search
+        async function performSimpleSearch() {
+            const query = document.getElementById('simpleQuery').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const container = document.getElementById('simpleResults');
+            container.innerHTML = '<div class="loading">🔍 Searching...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        user_id: 123  // Optional
+                    })
+                });
+
+                const data = await response.json();
+                displayResults('simpleResults', data, 'Simple');
+
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="results error">
+                        <h4>❌ Connection Error</h4>
+                        <p>Could not connect to RAG service. Make sure it's running on port 5000.</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Enhanced search with preferences
+        async function performEnhancedSearch() {
+            const query = document.getElementById('enhancedQuery').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const preferences = getSelectedPreferences();
+            const container = document.getElementById('enhancedResults');
+            container.innerHTML = '<div class="loading">🧠 AI Enhanced Searching...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/search_with_preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        user_id: 123,
+                        user_preferences: preferences
+                    })
+                });
+
+                const data = await response.json();
+                displayResults('enhancedResults', data, 'Enhanced');
+
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="results error">
+                        <h4>❌ Connection Error</h4>
+                        <p>Could not connect to RAG service. Make sure it's running on port 5000.</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Enter key support
+        document.getElementById('simpleQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performSimpleSearch();
+        });
+
+        document.getElementById('enhancedQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performEnhancedSearch();
+        });
+    </script>
+</body>
+</html>
