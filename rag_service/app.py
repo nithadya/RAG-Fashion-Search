@@ -1,15 +1,17 @@
 import os
 import time
+import json
 import mysql.connector
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # LangChain imports
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 # Groq imports
 try:
@@ -24,6 +26,9 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Enable CORS for all routes
+CORS(app, origins=['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080'])
 
 # Database configuration
 DB_CONFIG = {
@@ -40,56 +45,23 @@ rag_chain = None
 current_provider = None
 
 def get_llm_provider():
-    """Determine which LLM provider to use based on configuration"""
-    provider = os.getenv('LLM_PROVIDER', 'openai').lower()
+    """Determine which LLM provider to use - Groq only"""
+    if not GROQ_AVAILABLE:
+        raise ValueError("Groq is not available. Install with: pip install langchain-groq groq")
     
-    if provider == 'groq' and not GROQ_AVAILABLE:
-        print("⚠️ Groq requested but not available, falling back to OpenAI")
-        provider = 'openai'
+    if not os.getenv('GROQ_API_KEY'):
+        raise ValueError("GROQ_API_KEY is required but not found in environment")
     
-    # Verify API keys
-    if provider == 'openai' and not os.getenv('OPENAI_API_KEY'):
-        if os.getenv('GROQ_API_KEY') and GROQ_AVAILABLE:
-            print("⚠️ OpenAI key not found, switching to Groq")
-            provider = 'groq'
-        else:
-            raise ValueError("No valid API key found for any provider")
-    
-    if provider == 'groq' and not os.getenv('GROQ_API_KEY'):
-        if os.getenv('OPENAI_API_KEY'):
-            print("⚠️ Groq key not found, switching to OpenAI")
-            provider = 'openai'
-        else:
-            raise ValueError("No valid API key found for any provider")
-    
-    return provider
+    return 'groq'
 
-def create_llm(provider):
-    """Create LLM instance based on provider"""
-    if provider == 'openai':
-        # Prepare OpenAI configuration
-        openai_config = {
-            'model': os.getenv('OPENAI_LLM_MODEL', 'gpt-3.5-turbo'),
-            'temperature': float(os.getenv('TEMPERATURE', 0)),
-            'max_tokens': int(os.getenv('MAX_TOKENS', 150)),
-            'api_key': os.getenv('OPENAI_API_KEY')
-        }
-        
-        # Add project ID if provided (for sk-proj-... keys)
-        project_id = os.getenv('OPENAI_PROJECT_ID')
-        if project_id and project_id.strip():
-            openai_config['project'] = project_id.strip()
-        
-        return ChatOpenAI(**openai_config)
-    elif provider == 'groq':
-        return ChatGroq(
-            model=os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant'),
-            temperature=float(os.getenv('TEMPERATURE', 0)),
-            max_tokens=int(os.getenv('MAX_TOKENS', 150)),
-            groq_api_key=os.getenv('GROQ_API_KEY')
-        )
-    else:
-        raise ValueError(f"Unsupported provider: {provider}")
+def create_llm():
+    """Create Groq LLM instance"""
+    return ChatGroq(
+        model=os.getenv('GROQ_LLM_MODEL', 'llama-3.1-8b-instant'),
+        temperature=float(os.getenv('TEMPERATURE', 0)),
+        max_tokens=int(os.getenv('MAX_TOKENS', 150)),
+        groq_api_key=os.getenv('GROQ_API_KEY')
+    )
 
 def initialize_rag_system():
     """Initialize the LangChain RAG system components"""
@@ -98,23 +70,21 @@ def initialize_rag_system():
     try:
         print("🚀 Initializing RAG system...")
         
-        # Determine provider
+        # Determine provider (Groq only)
         current_provider = get_llm_provider()
         print(f"🤖 Using LLM provider: {current_provider.upper()}")
         
-        # Load embeddings model (currently using OpenAI for both providers)
-        # Note: You could switch to local embeddings for Groq if needed
-        embeddings_config = {
-            'model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
-            'api_key': os.getenv('OPENAI_API_KEY')
-        }
+        # Load HuggingFace embeddings (local, free)
+        embedding_model = os.getenv('EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
+        print(f"🤗 Using HuggingFace model: {embedding_model}")
+        print("⏳ Loading HuggingFace embeddings model (this may take a moment)...")
         
-        # Add project ID for embeddings if provided (for sk-proj-... keys)
-        project_id = os.getenv('OPENAI_PROJECT_ID')
-        if project_id and project_id.strip():
-            embeddings_config['project'] = project_id.strip()
-        
-        embeddings = OpenAIEmbeddings(**embeddings_config)
+        embeddings = HuggingFaceEmbeddings(
+            model_name=embedding_model,
+            model_kwargs={'device': 'cpu'},  # Use 'cuda' if you have GPU
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        print("✅ HuggingFace embeddings loaded successfully")
         
         # Load the local FAISS vector store
         vector_store_path = os.getenv('VECTOR_STORE_PATH', 'faiss_index')
@@ -134,13 +104,11 @@ def initialize_rag_system():
             search_kwargs={'k': max_docs}
         )
         
-        # Initialize the LLM based on provider
-        model = create_llm(current_provider)
+        # Initialize the Groq LLM
+        model = create_llm()
         
-        # Define the RAG prompt template (optimized for both providers)
-        if current_provider == 'groq':
-            # Groq models often work better with more structured prompts
-            template = """You are a helpful fashion assistant for StyleMe e-commerce store. Analyze the context and provide relevant product recommendations.
+        # Define the RAG prompt template (optimized for Groq)
+        template = """You are a helpful fashion assistant for StyleMe e-commerce store. Analyze the context and provide relevant product recommendations.
 
 PRODUCT CONTEXT:
 {context}
@@ -153,30 +121,6 @@ CURRENT QUERY: {question}
 TASK: Return only a comma-separated list of the most relevant product IDs (numbers only) from the context above. Consider the user's query and search history to provide personalized recommendations. Maximum 10 product IDs, ordered by relevance.
 
 RESPONSE FORMAT: Only product IDs separated by commas (example: 12, 45, 8)
-
-Product IDs:"""
-        else:
-            # OpenAI optimized prompt
-            template = """You are a helpful fashion assistant for StyleMe e-commerce store. Based on the retrieved product information and the user's search history, provide relevant product recommendations.
-
-CONTEXT (Product Information):
-{context}
-
-USER SEARCH HISTORY:
-{history}
-
-CURRENT SEARCH QUERY: {question}
-
-INSTRUCTIONS:
-1. Analyze the user's current query and search history to understand their preferences
-2. From the retrieved products, select the most relevant ones that match the user's intent
-3. Consider factors like: category match, price range, brand preference, color, size, occasion, and gender
-4. Prioritize products that align with the user's search patterns
-5. Return ONLY a comma-separated list of product IDs (numbers only)
-6. Limit to maximum 10 most relevant product IDs
-7. Order by relevance (most relevant first)
-
-RESPONSE FORMAT: Only return product IDs separated by commas (e.g., 12, 45, 8, 92)
 
 Product IDs:"""
 
@@ -259,16 +203,76 @@ def store_search_history(user_id, query):
     except Exception as e:
         print(f"Error storing search history: {e}")
 
+def format_search_history(history):
+    """Format search history for the prompt"""
+    if not history or history == "No previous searches":
+        return "No previous searches"
+    return history
+
+def parse_product_ids(result_str):
+    """Parse product IDs from LLM result string"""
+    try:
+        if isinstance(result_str, str):
+            # Clean the result string
+            cleaned_result = result_str.strip()
+            # Remove any non-numeric characters except commas and spaces
+            import re
+            cleaned_result = re.sub(r'[^\d,\s]', '', cleaned_result)
+            
+            # Split by comma and convert to integers
+            id_parts = [part.strip() for part in cleaned_result.split(',') if part.strip()]
+            product_ids = []
+            
+            for part in id_parts:
+                if part.isdigit():
+                    product_ids.append(int(part))
+            
+            # Remove duplicates while preserving order
+            seen = set()
+            product_ids = [x for x in product_ids if not (x in seen or seen.add(x))]
+            
+            return product_ids
+            
+    except (ValueError, AttributeError) as e:
+        print(f"Error parsing product IDs from result: {result_str}, Error: {e}")
+        
+    return []
+
+def log_user_search(user_id, query, product_ids, preferences):
+    """Log enhanced search with preferences for learning"""
+    try:
+        # Skip logging for guest users (None or invalid user_id)
+        if not user_id or user_id <= 0:
+            return
+            
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO search_preferences_log (user_id, query, preferences, recommended_products) 
+            VALUES (%s, %s, %s, %s)
+        ''', (user_id, query, json.dumps(preferences), json.dumps(product_ids)))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+    except Exception as e:
+        print(f"Error logging user search: {e}")
+
 def log_search(user_id, query, results_count, processing_time, enhanced_query=None):
     """Log search details for analytics"""
     try:
+        # Allow logging for guest users, but convert None to 0 for database
+        user_id_for_db = user_id if user_id and user_id > 0 else 0
+        
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
         cursor.execute('''
             INSERT INTO search_logs (user_id, query, results_count, enhanced_query, processing_time) 
             VALUES (%s, %s, %s, %s, %s)
-        ''', (user_id, query, results_count, enhanced_query, processing_time))
+        ''', (user_id_for_db, query, results_count, enhanced_query, processing_time))
         
         conn.commit()
         cursor.close()
@@ -387,6 +391,143 @@ def handle_search():
             'processing_time': processing_time,
             'provider_used': current_provider
         }), 500
+
+@app.route('/search_with_preferences', methods=['POST'])
+def search_with_preferences():
+    """Enhanced search endpoint with user preferences and matching scores"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+        user_id = data.get('user_id', 0)
+        preferences = data.get('preferences', {})
+        context = data.get('context', {})
+        
+        if not query:
+            return jsonify({'success': False, 'message': 'Query is required'}), 400
+            
+        print(f"🔍 Enhanced search: '{query}' for user {user_id}")
+        print(f"📋 Preferences: {preferences}")
+        
+        # Get user search history
+        history = get_user_search_history(user_id)
+        
+        # Create enhanced query incorporating preferences
+        enhanced_query = create_enhanced_query(query, preferences, context)
+        
+        start_time = time.time()
+        
+        # Get search results
+        print(f"🤖 Invoking RAG chain with enhanced query: {enhanced_query}")
+        results = rag_chain.invoke({
+            "question": enhanced_query,
+            "history": format_search_history(history)
+        })
+        
+        print(f"🔍 RAG chain raw results: {results}")
+        
+        processing_time = time.time() - start_time
+        
+        # Parse and validate product IDs
+        product_ids = parse_product_ids(results)
+        print(f"📦 Parsed product IDs: {product_ids}")
+        
+        # Calculate preference-based matching scores
+        matching_scores = calculate_preference_scores(product_ids, preferences, query)
+        print(f"📊 Matching scores: {matching_scores}")
+        
+        # Log search for learning
+        log_user_search(user_id, query, product_ids, preferences)
+        
+        response_data = {
+            'success': True,
+            'product_ids': product_ids,
+            'matching_scores': matching_scores,
+            'query': query,
+            'enhanced_query': enhanced_query,
+            'preferences_applied': preferences,
+            'results_count': len(product_ids),
+            'processing_time': round(processing_time, 3),
+            'provider_used': current_provider.upper(),
+            'service_version': '2.1.0-enhanced',
+            'history_considered': len(history) > 0
+        }
+        
+        print(f"✅ Returning response: {response_data}")
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"❌ Enhanced search error: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Enhanced search failed: {str(e)}',
+            'error_type': type(e).__name__
+        }), 500
+
+def create_enhanced_query(query, preferences, context):
+    """Create enhanced query incorporating user preferences"""
+    enhanced_parts = [query]
+    
+    # Add style preferences
+    style_prefs = preferences.get('style_preferences', [])
+    if style_prefs:
+        enhanced_parts.append(f"style: {', '.join(style_prefs)}")
+    
+    # Add color preferences
+    color_prefs = preferences.get('color_preferences', [])
+    if color_prefs:
+        enhanced_parts.append(f"colors: {', '.join(color_prefs)}")
+    
+    # Add budget context
+    budget_min = preferences.get('budget_min', 0)
+    budget_max = preferences.get('budget_max', 0)
+    if budget_max > 0:
+        enhanced_parts.append(f"budget: Rs.{budget_min}-{budget_max}")
+    
+    # Add occasion context
+    occasion = preferences.get('occasion', '')
+    if occasion:
+        enhanced_parts.append(f"occasion: {occasion}")
+    
+    # Add seasonal context
+    season = context.get('season', '')
+    if season:
+        enhanced_parts.append(f"season: {season}")
+    
+    return ' | '.join(enhanced_parts)
+
+def calculate_preference_scores(product_ids, preferences, query):
+    """Calculate preference-based matching scores for products"""
+    scores = []
+    
+    for product_id in product_ids:
+        # Base score from retrieval ranking
+        base_score = max(0.3, 1.0 - (len(scores) * 0.1))  # Decreasing score by position
+        
+        # This is a simplified version - in production, you'd fetch product details
+        # and calculate more sophisticated matching based on actual product attributes
+        preference_boost = 0.0
+        
+        # Style preference boost
+        if preferences.get('style_preferences'):
+            preference_boost += 0.1
+        
+        # Color preference boost
+        if preferences.get('color_preferences'):
+            preference_boost += 0.1
+        
+        # Budget consideration boost
+        if preferences.get('budget_max', 0) > 0:
+            preference_boost += 0.05
+        
+        # Occasion boost
+        if preferences.get('occasion'):
+            preference_boost += 0.05
+        
+        final_score = min(1.0, base_score + preference_boost)
+        scores.append(round(final_score, 3))
+    
+    return scores
 
 @app.route('/vector-store/stats', methods=['GET'])
 def vector_store_stats():

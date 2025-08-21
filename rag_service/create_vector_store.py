@@ -3,7 +3,7 @@ import mysql.connector
 from dotenv import load_dotenv
 from langchain.docstore.document import Document
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 # Load environment variables
 load_dotenv()
@@ -12,16 +12,10 @@ def create_vector_store():
     """
     Create FAISS vector store from product data in MySQL database.
     This replaces the traditional approach of storing embeddings in the database.
-    Note: Currently uses OpenAI embeddings regardless of LLM provider choice.
+    Note: Uses HuggingFace Sentence Transformers for embeddings (free, local).
     """
     print("🚀 Starting vector store creation process...")
-    print("📝 Note: Using OpenAI embeddings (works with both OpenAI and Groq LLM providers)")
-    
-    # Check if OpenAI API key is available for embeddings
-    if not os.getenv('OPENAI_API_KEY'):
-        print("❌ OPENAI_API_KEY is required for embeddings generation")
-        print("💡 Please set your OpenAI API key in the .env file")
-        return False
+    print("📝 Note: Using HuggingFace Sentence Transformers for embeddings (free, local, fast)")
     
     # Database connection
     try:
@@ -102,24 +96,20 @@ def create_vector_store():
 
     print(f"📝 Created {len(documents)} documents for indexing")
 
-    # Initialize OpenAI embeddings
+    # Initialize HuggingFace embeddings
     try:
-        embeddings_config = {
-            'model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
-            'api_key': os.getenv('OPENAI_API_KEY')
-        }
+        embedding_model = os.getenv('EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
+        print(f"🤗 Using HuggingFace model: {embedding_model}")
         
-        # Add project ID if provided (for sk-proj-... keys)
-        project_id = os.getenv('OPENAI_PROJECT_ID')
-        if project_id and project_id.strip():
-            embeddings_config['project'] = project_id.strip()
-            print(f"🔑 Using OpenAI project: {project_id.strip()}")
-        
-        embeddings = OpenAIEmbeddings(**embeddings_config)
-        print("✅ Initialized OpenAI embeddings (compatible with all LLM providers)")
+        embeddings = HuggingFaceEmbeddings(
+            model_name=embedding_model,
+            model_kwargs={'device': 'cpu'},  # Use 'cuda' if you have GPU
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        print("✅ Initialized HuggingFace embeddings (local, free, fast)")
     except Exception as e:
         print(f"❌ Failed to initialize embeddings: {e}")
-        print("💡 Make sure your OPENAI_API_KEY is set correctly in .env file")
+        print("💡 Make sure sentence-transformers is installed: pip install sentence-transformers")
         return False
 
     # Create FAISS vector store

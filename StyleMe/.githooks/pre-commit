@@ -1,3 +1,0 @@
-#!/bin/sh
-# Pre-commit hook: run bug discovery to ensure bugs.json is up to date before committing
-php "$(pwd)/scripts/discover_bugs.php" || true

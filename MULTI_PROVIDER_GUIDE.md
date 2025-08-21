@@ -93,18 +93,29 @@ OPENAI_EMBEDDING_MODEL=text-embedding-ada-002
 OpenAI offers two types of API keys:
 
 **1. Legacy Keys (`sk-...`)**
+
 - Format: `sk-1234567890abcdef...`
 - Scoped to your entire organization
 - Still supported but being phased out
 
 **2. Project Keys (`sk-proj-...`) - Recommended**
+
 - Format: `sk-proj-1234567890abcdef...`
 - Scoped to specific projects for better security
 - Better billing tracking and access control
 
-### Configuration for Project Keys
+### OpenAI Project API Keys
 
-If your API key starts with `sk-proj-`, you may need to specify the project ID:
+OpenAI offers two key types; the RAG system supports both but project keys are recommended.
+
+#### Key Types
+
+- **Legacy (user) keys**: `sk-...` — organization-scoped, older format.
+- **Project keys**: `sk-proj-...` — scoped to a specific project, recommended for security and billing.
+
+If your API key starts with `sk-proj-`, you may optionally set a project ID to ensure requests are routed correctly and billed to the right project.
+
+#### Configuration (add to `rag_service/.env`)
 
 ```bash
 # Your project-based API key
@@ -114,15 +125,41 @@ OPENAI_API_KEY="sk-proj-your-actual-key-here"
 OPENAI_PROJECT_ID="proj_your-project-id-here"
 ```
 
-**To find your Project ID:**
-1. Go to: https://platform.openai.com/settings/organization/projects
-2. Copy your project ID (format: `proj_1234567890abcdef...`)
+#### How to find your Project ID
 
-**Benefits of Project Keys:**
-- ✅ Better security and access control
-- ✅ Clearer billing and usage tracking  
-- ✅ Separate rate limits per project
-- ✅ Future-proof (recommended by OpenAI)
+1. Visit: https://platform.openai.com/settings/organization/projects
+2. Copy the project ID (format: `proj_1234567890abcdef...`)
+
+#### Benefits of using project keys
+
+- ✅ Better security and fine-grained access control
+- ✅ Clearer billing and usage tracking by project
+- ✅ Separate rate limits and quotas per project
+- ✅ Recommended for new implementations and team workflows
+
+#### Quick tests & troubleshooting
+
+- Test without project header:
+
+```bash
+curl -H "Authorization: Bearer your-api-key" https://api.openai.com/v1/models
+```
+
+- Test with project header:
+
+```bash
+curl -H "Authorization: Bearer your-api-key" \
+  -H "OpenAI-Project: your-project-id" \
+  https://api.openai.com/v1/models
+```
+
+Common issues:
+
+- "Invalid project": verify `OPENAI_PROJECT_ID` matches the project for that key and begins with `proj_`
+- "Authentication failed": confirm key is active and has permissions
+- "Model not available": ensure the project has model access enabled
+
+Note: legacy `sk-` keys continue to work for now, but project keys are the recommended path forward.
 
 ### Available Groq Models
 

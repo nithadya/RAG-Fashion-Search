@@ -1,0 +1,93 @@
+/* Enhanced Match Score Styling */
+.match-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.match-info {
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 6px;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.match-details {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    padding: 4px 6px;
+    border-left: 3px solid #17a2b8;
+}
+
+.progress-sm {
+    height: 4px;
+}
+
+.card.border-success {
+    box-shadow: 0 0 0 1px rgba(25, 135, 84, 0.25), 0 2px 4px rgba(25, 135, 84, 0.1);
+}
+
+.card.border-info {
+    box-shadow: 0 0 0 1px rgba(13, 202, 240, 0.25), 0 2px 4px rgba(13, 202, 240, 0.1);
+}
+
+.card.border-warning {
+    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.25), 0 2px 4px rgba(255, 193, 7, 0.1);
+}
+
+.card.border-secondary {
+    box-shadow: 0 0 0 1px rgba(108, 117, 125, 0.25), 0 2px 4px rgba(108, 117, 125, 0.1);
+}
+
+/* Match Score Animation */
+.match-badge {
+    animation: fadeInScale 0.5s ease-out;
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Progress bar smooth animation */
+.progress-bar {
+    transition: width 0.8s ease-in-out;
+}
+
+/* Tooltip for match details */
+.match-details {
+    transition: all 0.3s ease;
+}
+
+.match-details:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Enhanced search results summary */
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+    background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.05) 100%);
+}
+
+/* Product card hover effects for RAG results */
+.card.border-success:hover,
+.card.border-info:hover,
+.card.border-warning:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}

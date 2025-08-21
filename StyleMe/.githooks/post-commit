@@ -1,4 +1,0 @@
-#!/bin/sh
-# Post-commit hook: call PHP script to update bugs.json when commit message contains "Fixes #<id>"
-COMMIT_SHA=$(git rev-parse HEAD)
-php "$(pwd)/scripts/update_bugs_from_commit.php" "$COMMIT_SHA"

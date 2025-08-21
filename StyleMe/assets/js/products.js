@@ -1,3 +1,6 @@
+// Global filters object
+window.filters = {};
+
 $(document).ready(function() {
     // Check user authentication status
     checkAuthStatus();
@@ -14,8 +17,8 @@ $(document).ready(function() {
     const categoryId = urlParams.get('category');
     const filter = urlParams.get('filter');
     
-    // Set initial filters based on URL
-    let filters = {
+    // Set initial filters based on URL - make it global
+    window.filters = {
         search: searchQuery || '',
         category: categoryId || '',
         min_price: '',
@@ -31,23 +34,20 @@ $(document).ready(function() {
     };
     
     if (filter === 'discount') {
-        filters.min_discount = 1;
+        window.filters.min_discount = 1;
     }
     
     // Load filter options first, then products
     loadFilterOptions().then(() => {
-        loadProducts(filters);
-        setupFilterEventListeners(filters);
+        loadProducts(window.filters);
+        setupFilterEventListeners();
     });
     
-    // Search functionality
+    // Enhanced RAG Search functionality
     $('#searchBtn').click(function() {
         const query = $('#searchInput').val().trim();
         if (query !== '') {
-            filters.search = query;
-            filters.page = 1;
-            loadProducts(filters);
-            updateURL(filters);
+            performRAGSearch(query, window.filters);
         }
     });
     
@@ -55,10 +55,7 @@ $(document).ready(function() {
         if (e.which === 13) {
             const query = $(this).val().trim();
             if (query !== '') {
-                filters.search = query;
-                filters.page = 1;
-                loadProducts(filters);
-                updateURL(filters);
+                performRAGSearch(query, window.filters);
             }
         }
     });
@@ -66,23 +63,23 @@ $(document).ready(function() {
     // Sort functionality
     $(document).on('click', '.sort-option', function(e) {
         e.preventDefault();
-        filters.sort = $(this).data('sort');
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.sort = $(this).data('sort');
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // View toggle functionality
     $(document).on('click', '.view-option', function() {
         $('.view-option').removeClass('active');
         $(this).addClass('active');
-        filters.view = $(this).data('view');
-        renderProducts(filters.view, currentProducts);
+        window.filters.view = $(this).data('view');
+        renderProducts(window.filters.view, currentProducts);
     });
     
     // Reset filters functionality
     $(document).on('click', '#resetFilters', function() {
-        resetAllFilters(filters);
+        resetAllFilters();
     });
     
     // Logout functionality
@@ -95,70 +92,70 @@ $(document).ready(function() {
 let currentProducts = [];
 let currentPagination = {};
 
-function setupFilterEventListeners(filters) {
+function setupFilterEventListeners() {
     // Category filter - use event delegation
     $(document).on('change', '.category-filter', function() {
-        filters.category = $(this).val();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.category = $(this).val();
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Price filter
     $(document).on('click', '#applyPriceFilter', function() {
-        filters.min_price = $('#minPrice').val();
-        filters.max_price = $('#maxPrice').val();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.min_price = $('#minPrice').val();
+        window.filters.max_price = $('#maxPrice').val();
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Brand filter
     $(document).on('change', '.brand-filter', function() {
-        filters.brand = $('.brand-filter:checked').map(function() {
+        window.filters.brand = $('.brand-filter:checked').map(function() {
             return $(this).val();
         }).get();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Size filter
     $(document).on('change', '.size-filter', function() {
-        filters.size = $('.size-filter:checked').map(function() {
+        window.filters.size = $('.size-filter:checked').map(function() {
             return $(this).val();
         }).get();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Color filter
     $(document).on('change', '.color-filter', function() {
-        filters.color = $('.color-filter:checked').map(function() {
+        window.filters.color = $('.color-filter:checked').map(function() {
             return $(this).val();
         }).get();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Occasion filter
     $(document).on('change', '.occasion-filter', function() {
-        filters.occasion = $('.occasion-filter:checked').map(function() {
+        window.filters.occasion = $('.occasion-filter:checked').map(function() {
             return $(this).val();
         }).get();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
     
     // Gender filter
     $(document).on('change', '.gender-filter', function() {
-        filters.gender = $(this).val();
-        filters.page = 1;
-        loadProducts(filters);
-        updateURL(filters);
+        window.filters.gender = $(this).val();
+        window.filters.page = 1;
+        loadProducts(window.filters);
+        updateURL(window.filters);
     });
 }
 
@@ -317,7 +314,7 @@ function loadProducts(filters) {
                 currentPagination = response.pagination || {};
                 
                 renderProducts(filters.view, currentProducts);
-                renderPagination(currentPagination, filters.page, filters);
+                renderPagination(currentPagination, filters.page);
                 
                 // Update page title based on search
                 if (filters.search) {
@@ -336,7 +333,7 @@ function loadProducts(filters) {
     });
 }
 
-function renderPagination(pagination, currentPage, filters) {
+function renderPagination(pagination, currentPage) {
     const $pagination = $('#pagination');
     $pagination.empty();
     
@@ -398,9 +395,9 @@ function renderPagination(pagination, currentPage, filters) {
         e.preventDefault();
         const page = parseInt($(this).data('page'));
         if (page && page !== currentPage) {
-            filters.page = page;
-            loadProducts(filters);
-            updateURL(filters);
+            window.filters.page = page;
+            loadProducts(window.filters);
+            updateURL(window.filters);
             
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -408,7 +405,7 @@ function renderPagination(pagination, currentPage, filters) {
     });
 }
 
-function resetAllFilters(filters) {
+function resetAllFilters() {
     // Reset all filter values
     $('input[type="checkbox"]').prop('checked', false);
     $('input[type="radio"][name="gender"]').prop('checked', function() {
@@ -420,25 +417,25 @@ function resetAllFilters(filters) {
     $('#minPrice, #maxPrice').val('');
     
     // Reset filters object
-    filters.search = '';
-    filters.category = '';
-    filters.min_price = '';
-    filters.max_price = '';
-    filters.brand = [];
-    filters.size = [];
-    filters.color = [];
-    filters.occasion = [];
-    filters.gender = '';
-    filters.sort = 'newest';
-    filters.page = 1;
-    filters.view = 'grid';
+    window.filters.search = '';
+    window.filters.category = '';
+    window.filters.min_price = '';
+    window.filters.max_price = '';
+    window.filters.brand = [];
+    window.filters.size = [];
+    window.filters.color = [];
+    window.filters.occasion = [];
+    window.filters.gender = '';
+    window.filters.sort = 'newest';
+    window.filters.page = 1;
+    window.filters.view = 'grid';
     
     // Update URL without reload
     const newUrl = window.location.pathname;
     window.history.pushState({}, '', newUrl);
     
     // Reload products
-    loadProducts(filters);
+    loadProducts(window.filters);
     
     // Reset page title
     $('#productListingTitle').text('All Products');
@@ -803,6 +800,134 @@ $(document).on('click', '.add-to-cart', function() {
         }
     });
 });
+
+// RAG Search Integration
+async function performRAGSearch(query, filters) {
+    try {
+        // Show enhanced loading state for RAG search
+        $('#productList').html(`
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">AI Search in progress...</span>
+                </div>
+                <p class="mt-3">🤖 AI is finding the best matches for "${query}"...</p>
+                <small class="text-muted">Using intelligent search to understand your preferences</small>
+            </div>
+        `);
+
+        // Get user ID if logged in
+        const userId = getCurrentUserId() || 0;
+        
+        // Call RAG search endpoint
+        const ragResponse = await fetch('http://localhost:5000/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                user_id: userId
+            })
+        });
+
+        if (!ragResponse.ok) {
+            throw new Error(`RAG search failed: ${ragResponse.status}`);
+        }
+
+        const ragData = await ragResponse.json();
+
+        if (!ragData.success) {
+            throw new Error(ragData.message || 'RAG search failed');
+        }
+
+        // Show RAG search results info
+        showToast(`AI found ${ragData.results_count} matching products in ${ragData.processing_time}s`, 'success');
+
+        if (ragData.product_ids && ragData.product_ids.length > 0) {
+            // Load specific products by IDs from RAG
+            await loadProductsByIds(ragData.product_ids, query);
+        } else {
+            // Fallback to regular search if no RAG results
+            console.log('No RAG results, falling back to regular search');
+            filters.search = query;
+            filters.page = 1;
+            loadProducts(filters);
+        }
+
+        // Update URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('search', query);
+        window.history.pushState({}, '', newUrl);
+
+    } catch (error) {
+        console.error('RAG search error:', error);
+        showToast('AI search unavailable, using standard search', 'warning');
+        
+        // Fallback to regular search
+        filters.search = query;
+        filters.page = 1;
+        loadProducts(filters);
+        updateURL(filters);
+    }
+}
+
+// Load specific products by their IDs (from RAG results)
+async function loadProductsByIds(productIds, originalQuery) {
+    try {
+        const response = await fetch('api/products.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'get_by_ids',
+                product_ids: productIds
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.products) {
+            currentProducts = data.products;
+            currentPagination = {
+                total_items: data.products.length,
+                items_per_page: data.products.length,
+                current_page: 1,
+                total_pages: 1
+            };
+
+            renderProducts('grid', currentProducts);
+            
+            // Update title with RAG results
+            $('#productListingTitle').html(`
+                🤖 AI Search Results for: <em>"${originalQuery}"</em> 
+                (${data.products.length} intelligent matches)
+            `);
+            
+            // Clear pagination since we're showing all RAG results
+            $('#pagination').html('');
+        } else {
+            showNoResults();
+        }
+    } catch (error) {
+        console.error('Error loading RAG products:', error);
+        showNoResults();
+    }
+}
+
+// Helper function to get current user ID
+function getCurrentUserId() {
+    // Check if user is logged in and get ID from localStorage or session
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+        try {
+            return JSON.parse(userData).id;
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
 
 function showToast(message, type = 'info') {
     const toastId = 'toast-' + Date.now();

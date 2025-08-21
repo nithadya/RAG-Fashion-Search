@@ -137,8 +137,9 @@ class Database
             $this->rollback();
         }
 
-        if ($this->conn) {
+        if ($this->conn && !$this->conn->connect_errno) {
             $this->conn->close();
+            $this->conn = null;
         }
     }
 }
