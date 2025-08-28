@@ -34,7 +34,7 @@ CREATE TABLE `cart` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,6 @@ CREATE TABLE `cart` (
 
 LOCK TABLES `cart` WRITE;
 /*!40000 ALTER TABLE `cart` DISABLE KEYS */;
-INSERT INTO `cart` VALUES (15,4,1,1,'2025-08-26 18:46:54','2025-08-26 18:46:54');
 /*!40000 ALTER TABLE `cart` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,10 +85,17 @@ DROP TABLE IF EXISTS `feedback`;
 CREATE TABLE `feedback` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
-  `type` enum('Search','Chatbot','General') COLLATE utf8mb4_general_ci NOT NULL,
+  `type` enum('Search','Chatbot','General','contact','feedback','suggestion','complaint') COLLATE utf8mb4_general_ci DEFAULT 'General',
   `message` text COLLATE utf8mb4_general_ci NOT NULL,
   `rating` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `subject` varchar(500) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `status` enum('new','read','in_progress','resolved','closed') COLLATE utf8mb4_general_ci DEFAULT 'new',
+  `admin_reply` text COLLATE utf8mb4_general_ci,
+  `admin_user_id` int DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
@@ -123,7 +129,7 @@ CREATE TABLE `order_items` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -132,7 +138,7 @@ CREATE TABLE `order_items` (
 
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
-INSERT INTO `order_items` VALUES (3,3,11,10,2150.00);
+INSERT INTO `order_items` VALUES (3,3,11,10,2150.00),(4,4,1,3,1999.00),(5,4,2,1,3500.00),(6,4,13,1,200.00);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -159,7 +165,7 @@ CREATE TABLE `orders` (
   UNIQUE KEY `order_number` (`order_number`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -168,7 +174,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (3,1,'ORD-686B7E0E6BFC2',21500.00,'Pending','cod','Kugala, KUGALA, 60034','0771234568','','2025-07-07 07:58:06','2025-07-07 07:58:06');
+INSERT INTO `orders` VALUES (3,1,'ORD-686B7E0E6BFC2',21500.00,'Pending','cod','Kugala, KUGALA, 60034','0771234568','','2025-07-07 07:58:06','2025-07-07 07:58:06'),(4,4,'ORD-68AFF1C2B0507',9697.00,'Pending','cod','33/5 Miriswatta,gampaha, Gampaha, 11715','0752957359','','2025-08-28 06:05:54','2025-08-28 06:05:54');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,7 +208,7 @@ CREATE TABLE `products` (
   UNIQUE KEY `slug` (`slug`),
   KEY `category_id` (`category_id`),
   CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +217,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,1,'Men\'s Casual Shirt','mens-casual-shirt','Comfortable cotton shirt for casual wear',2500.00,1999.00,'M,L,XL','Blue','Cotton King','Casual','Male',50,'product_1751861652_686b4994b985f.jpg','shirt2.jpg','shirt3.jpg','2025-07-05 23:34:22','2025-07-07 04:14:12'),(2,1,'Men\'s Formal Trouser','mens-formal-trouser','Premium quality formal trousers',3500.00,NULL,'30,32,34','Black','FormalX','Formal','Male',29,'trouser1.jpg','trouser2.jpg',NULL,'2025-07-05 23:34:22','2025-07-07 05:38:37'),(3,2,'Women\'s Floral Dress','womens-floral-dress','Elegant floral print dress',4200.00,3599.00,'S,M,L','Multicolor','FashionLady','Party','Female',25,'dress1.jpg','dress2.jpg','dress3.jpg','2025-07-05 23:34:22','2025-07-06 20:50:27'),(4,2,'Women\'s Jeans','womens-jeans','Slim fit jeans for women',3800.00,NULL,'28,30,32','Blue','Denim Queen','Casual','Female',40,'jeans1.jpg','jeans2.jpg',NULL,'2025-07-05 23:34:22','2025-07-05 23:34:22'),(9,5,'Men\'s Sarong','mens-sarong','Traditional Sri Lankan sarong',1800.00,1500.00,'Free Size','White/Black','LankaStyle','Traditional','Male',45,'sarong1.jpg','sarong2.jpg',NULL,'2025-07-05 23:34:22','2025-07-05 23:34:22'),(10,5,'Women\'s Kandyan Saree','womens-kandyan-saree','Authentic Kandyan saree',8500.00,7999.00,'Free Size','Red/Gold','LankaStyle','Traditional','Female',18,'saree1.jpg','saree2.jpg','saree3.jpg','2025-07-05 23:34:22','2025-07-05 23:34:22'),(11,5,'Boxy Oversized Tee','boxy-oversized-tee','The Boxy Oversized Tee offers a relaxed, cropped fit for a modern streetwear look. Made from 180 GSM 100% cotton single jersey fabric, it provides a soft, breathable feel. The rib knit crew neck adds a classic touch, while the small F.O.A logo print on the front left side completes the design.\r\n\r\nThe male model is 5\'10\" and wears a size M, while the female model is 5\'4\" and wears a size S.\r\n\r\nProduct color may slightly vary due to photographic lighting sources or your monitor/device settings.',4300.00,2150.00,'S,M,L,XL','White, Black,Gray','FOA Clothing','','Unisex',10,'product_1751861987_686b4ae37c1b2.jpg','product_1751861987_686b4ae37c550.jpg','product_1751861987_686b4ae37c7bd.jpg','2025-07-07 04:19:47','2025-07-07 07:58:06');
+INSERT INTO `products` VALUES (1,1,'Men\'s Casual Shirt','mens-casual-shirt','Comfortable cotton shirt for casual wear',2500.00,1999.00,'M,L,XL','Blue','Cotton King','Casual','Male',47,'product_1751861652_686b4994b985f.jpg','shirt2.jpg','shirt3.jpg','2025-07-05 23:34:22','2025-08-28 06:05:54'),(2,1,'Men\'s Formal Trouser','mens-formal-trouser','Premium quality formal trousers',3500.00,NULL,'30,32,34','Black','FormalX','Formal','Male',28,'trouser1.jpg','trouser2.jpg',NULL,'2025-07-05 23:34:22','2025-08-28 06:05:54'),(3,2,'Women\'s Floral Dress','womens-floral-dress','Elegant floral print dress',4200.00,3599.00,'S,M,L','Multicolor','FashionLady','Party','Female',25,'dress1.jpg','dress2.jpg','dress3.jpg','2025-07-05 23:34:22','2025-07-06 20:50:27'),(4,2,'Women\'s Jeans','womens-jeans','Slim fit jeans for women',3800.00,NULL,'28,30,32','Blue','Denim Queen','Casual','Female',40,'jeans1.jpg','jeans2.jpg',NULL,'2025-07-05 23:34:22','2025-07-05 23:34:22'),(9,5,'Men\'s Sarong','mens-sarong','Traditional Sri Lankan sarong',1800.00,1500.00,'Free Size','White/Black','LankaStyle','Traditional','Male',45,'sarong1.jpg','sarong2.jpg',NULL,'2025-07-05 23:34:22','2025-07-05 23:34:22'),(10,5,'Women\'s Kandyan Saree','womens-kandyan-saree','Authentic Kandyan saree',8500.00,7999.00,'Free Size','Red/Gold','LankaStyle','Traditional','Female',18,'saree1.jpg','saree2.jpg','saree3.jpg','2025-07-05 23:34:22','2025-07-05 23:34:22'),(11,5,'Boxy Oversized Tee','boxy-oversized-tee','The Boxy Oversized Tee offers a relaxed, cropped fit for a modern streetwear look. Made from 180 GSM 100% cotton single jersey fabric, it provides a soft, breathable feel. The rib knit crew neck adds a classic touch, while the small F.O.A logo print on the front left side completes the design.\r\n\r\nThe male model is 5\'10\" and wears a size M, while the female model is 5\'4\" and wears a size S.\r\n\r\nProduct color may slightly vary due to photographic lighting sources or your monitor/device settings.',4300.00,2150.00,'S,M,L,XL','White, Black,Gray','FOA Clothing','','Unisex',10,'product_1751861987_686b4ae37c1b2.jpg','product_1751861987_686b4ae37c550.jpg','product_1751861987_686b4ae37c7bd.jpg','2025-07-07 04:19:47','2025-07-07 07:58:06'),(13,1,'Black Hoodies','black-hoodies','Black long sleeves hoodie for parties',2000.00,200.00,'L','Black','Carnage','Casual','Unisex',11,'product_1756359308_68afea8ca8f56.jpg',NULL,NULL,'2025-08-28 05:35:08','2025-08-28 06:05:54');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -262,7 +268,7 @@ CREATE TABLE `search_logs` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `search_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -271,7 +277,7 @@ CREATE TABLE `search_logs` (
 
 LOCK TABLES `search_logs` WRITE;
 /*!40000 ALTER TABLE `search_logs` DISABLE KEYS */;
-INSERT INTO `search_logs` VALUES (1,1,'men\'s shirt',1,'2025-08-20 22:19:52','Based on the user\'s query and search history, the most relevant product IDs are:\n\n1, 1, 11 \n\nThese product IDs correspond to the Men\'s Casual Shirt (Product ID: 1) and the Boxy Oversized Tee (Product ID: 11), which are both relevant to the user\'s query \"men\'s shirt\".',6.227),(2,1,'men\'s shirt',2,'2025-08-20 22:20:15','Based on the user\'s query and search history, the most relevant product IDs are:\n\n1, 1, 11 \n\nThese product IDs correspond to the \"Men\'s Casual Shirt\" and \"Boxy Oversized Tee\" which are both men\'s shirts and relevant to the user\'s search history and current query.',2.864),(3,1,'women\'s dress red color',1,'2025-08-20 22:20:19','Based on the user\'s query \"women\'s dress red color\" and search history, I recommend the following product IDs:\n\n3, 10\n\nThese product IDs correspond to the Women\'s Floral Dress (Product ID: 3) and Women\'s Kandyan Saree (Product ID: 10), which are both dresses and match the user\'s query for a red color.',1.431),(4,1,'casual wear under 3000 rupees',7,'2025-08-20 22:20:23','Based on the user\'s query \"casual wear under 3000 rupees\" and their search history, I recommend the following product IDs:\n\n1, 2, 1, 4, 11, 3, 9, 1, 2, 11\n\nThese product IDs are relevant because they match the user\'s query and search history. Product IDs 1 and 2 are men\'s casual shirts and formal trousers, respectively, which match the user\'s search history for \"men\'s shirt\". Product ID 4 is a pair of women\'s jeans, which matches the user\'s query for casual wear. Product ID 11 is a boxy oversized tee, which is a casual wear item under 3000 rupees',1.021),(5,1,'formal trouser black',4,'2025-08-20 22:20:27','Based on the user\'s query \"formal trouser black\" and search history, the most relevant product IDs are:\n\n2, 1, 9\n\nThese product IDs correspond to the following products:\n\n- Product ID 2: Men\'s Formal Trouser (Black)\n- Product ID 1: Men\'s Casual Shirt (Blue) - Although the color is not black, it\'s a casual wear option under 3000 rupees, which is relevant to the user\'s search history.\n- Product ID 9: Men\'s Sarong (White/Black) - Although the color is not black, it\'s a traditional option that might be relevant to the user\'s query.\n\nNote that Product ID 9 is not a perfect match, but',1.019),(6,1,'saree traditional',2,'2025-08-20 22:20:30','Based on the user\'s query \"saree traditional\" and search history, the most relevant product IDs are:\n\n10, 9',0.960),(7,1,'oversized tee white',2,'2025-08-20 22:20:34','Based on the user\'s query \"oversized tee white\" and search history, I recommend the following product IDs:\n\n11, 9\n\nThese product IDs are relevant because they match the user\'s query for an \"oversized tee\" and are likely to be white in color. Product ID 11 is a Boxy Oversized Tee, and Product ID 9 is a Men\'s Sarong, which is a traditional Sri Lankan garment that may be white in color.',1.038),(8,1,'sportswear for men',2,'2025-08-20 22:20:37','Based on the user\'s query \"sportswear for men\" and search history, I recommend the following product IDs:\n\n11, 9\n\nThese product IDs correspond to the \"Boxy Oversized Tee\" and \"Men\'s Sarong\" products, which are directly related to the user\'s query and search history.',0.550),(9,1,'blue jeans women',4,'2025-08-20 22:20:41','Based on the user\'s query \"blue jeans women\" and search history, I recommend the following product IDs:\n\n4, 28, 30, 32 \n\nThese product IDs correspond to the Women\'s Jeans product, which matches the user\'s query.',0.621),(10,1,'party dress',3,'2025-08-20 22:20:45','Based on the user\'s query \"party dress\" and search history, the most relevant product IDs are:\n\n3, 4, 10\n\nThese product IDs correspond to the Women\'s Floral Dress (Product ID: 3), Women\'s Jeans (Product ID: 4), and Women\'s Kandyan Saree (Product ID: 10), which are all relevant to the user\'s query and search history.',1.739),(11,1,'affordable shirts',1,'2025-08-20 22:20:49','Based on the user\'s query \"affordable shirts\" and search history, I recommend the following product IDs:\n\n1, 1, 11 \n\nThese product IDs correspond to the most relevant products in the context: \n\n- Product ID 1: Men\'s Casual Shirt (affordable and a shirt)\n- Product ID 11: Boxy Oversized Tee (affordable and a shirt/tee)',0.653),(12,1,'casual blue shirt',3,'2025-08-20 22:36:23','Based on the user\'s query \"casual blue shirt\" and search history, the most relevant product IDs are:\n\n1, 11, 4, 1',2.360),(13,1,'casual blue shirt',3,'2025-08-20 23:19:12','Based on the user\'s query and search history, here are the most relevant product IDs:\n\n1, 1, 4, 3, 11 \n\nThese product IDs correspond to the following products:\n\n- Product ID: 1 (Men\'s Casual Shirt)\n- Product ID: 1 (Men\'s Casual Shirt) - Duplicate of the first result, but since it\'s the same product, it\'s included again\n- Product ID: 4 (Women\'s Jeans)\n- Product ID: 3 (Women\'s Floral Dress)\n- Product ID: 11 (Boxy Oversized Tee)\n\nThese products are relevant because they match the user\'s query for a \"casual blue shirt\" and are also related to the user\'s search history',1.111),(14,1,'casual blue shirt',2,'2025-08-20 23:21:23','Based on the user\'s query and search history, here are the most relevant product IDs:\n\n1, 1, 4 \n\nThese product IDs correspond to the following products:\n- Product ID: 1 | Men\'s Casual Shirt (Blue)\n- Product ID: 1 | Men\'s Casual Shirt (Blue) (Duplicate query, hence included)\n- Product ID: 4 | Women\'s Jeans (Blue)\n\nThese products match the user\'s query for a \"casual blue shirt\" and are relevant based on their search history for similar products.',0.768);
+INSERT INTO `search_logs` VALUES (1,1,'men\'s shirt',1,'2025-08-20 22:19:52','Based on the user\'s query and search history, the most relevant product IDs are:\n\n1, 1, 11 \n\nThese product IDs correspond to the Men\'s Casual Shirt (Product ID: 1) and the Boxy Oversized Tee (Product ID: 11), which are both relevant to the user\'s query \"men\'s shirt\".',6.227),(2,1,'men\'s shirt',2,'2025-08-20 22:20:15','Based on the user\'s query and search history, the most relevant product IDs are:\n\n1, 1, 11 \n\nThese product IDs correspond to the \"Men\'s Casual Shirt\" and \"Boxy Oversized Tee\" which are both men\'s shirts and relevant to the user\'s search history and current query.',2.864),(3,1,'women\'s dress red color',1,'2025-08-20 22:20:19','Based on the user\'s query \"women\'s dress red color\" and search history, I recommend the following product IDs:\n\n3, 10\n\nThese product IDs correspond to the Women\'s Floral Dress (Product ID: 3) and Women\'s Kandyan Saree (Product ID: 10), which are both dresses and match the user\'s query for a red color.',1.431),(4,1,'casual wear under 3000 rupees',7,'2025-08-20 22:20:23','Based on the user\'s query \"casual wear under 3000 rupees\" and their search history, I recommend the following product IDs:\n\n1, 2, 1, 4, 11, 3, 9, 1, 2, 11\n\nThese product IDs are relevant because they match the user\'s query and search history. Product IDs 1 and 2 are men\'s casual shirts and formal trousers, respectively, which match the user\'s search history for \"men\'s shirt\". Product ID 4 is a pair of women\'s jeans, which matches the user\'s query for casual wear. Product ID 11 is a boxy oversized tee, which is a casual wear item under 3000 rupees',1.021),(5,1,'formal trouser black',4,'2025-08-20 22:20:27','Based on the user\'s query \"formal trouser black\" and search history, the most relevant product IDs are:\n\n2, 1, 9\n\nThese product IDs correspond to the following products:\n\n- Product ID 2: Men\'s Formal Trouser (Black)\n- Product ID 1: Men\'s Casual Shirt (Blue) - Although the color is not black, it\'s a casual wear option under 3000 rupees, which is relevant to the user\'s search history.\n- Product ID 9: Men\'s Sarong (White/Black) - Although the color is not black, it\'s a traditional option that might be relevant to the user\'s query.\n\nNote that Product ID 9 is not a perfect match, but',1.019),(6,1,'saree traditional',2,'2025-08-20 22:20:30','Based on the user\'s query \"saree traditional\" and search history, the most relevant product IDs are:\n\n10, 9',0.960),(7,1,'oversized tee white',2,'2025-08-20 22:20:34','Based on the user\'s query \"oversized tee white\" and search history, I recommend the following product IDs:\n\n11, 9\n\nThese product IDs are relevant because they match the user\'s query for an \"oversized tee\" and are likely to be white in color. Product ID 11 is a Boxy Oversized Tee, and Product ID 9 is a Men\'s Sarong, which is a traditional Sri Lankan garment that may be white in color.',1.038),(8,1,'sportswear for men',2,'2025-08-20 22:20:37','Based on the user\'s query \"sportswear for men\" and search history, I recommend the following product IDs:\n\n11, 9\n\nThese product IDs correspond to the \"Boxy Oversized Tee\" and \"Men\'s Sarong\" products, which are directly related to the user\'s query and search history.',0.550),(9,1,'blue jeans women',4,'2025-08-20 22:20:41','Based on the user\'s query \"blue jeans women\" and search history, I recommend the following product IDs:\n\n4, 28, 30, 32 \n\nThese product IDs correspond to the Women\'s Jeans product, which matches the user\'s query.',0.621),(10,1,'party dress',3,'2025-08-20 22:20:45','Based on the user\'s query \"party dress\" and search history, the most relevant product IDs are:\n\n3, 4, 10\n\nThese product IDs correspond to the Women\'s Floral Dress (Product ID: 3), Women\'s Jeans (Product ID: 4), and Women\'s Kandyan Saree (Product ID: 10), which are all relevant to the user\'s query and search history.',1.739),(11,1,'affordable shirts',1,'2025-08-20 22:20:49','Based on the user\'s query \"affordable shirts\" and search history, I recommend the following product IDs:\n\n1, 1, 11 \n\nThese product IDs correspond to the most relevant products in the context: \n\n- Product ID 1: Men\'s Casual Shirt (affordable and a shirt)\n- Product ID 11: Boxy Oversized Tee (affordable and a shirt/tee)',0.653),(12,1,'casual blue shirt',3,'2025-08-20 22:36:23','Based on the user\'s query \"casual blue shirt\" and search history, the most relevant product IDs are:\n\n1, 11, 4, 1',2.360),(13,1,'casual blue shirt',3,'2025-08-20 23:19:12','Based on the user\'s query and search history, here are the most relevant product IDs:\n\n1, 1, 4, 3, 11 \n\nThese product IDs correspond to the following products:\n\n- Product ID: 1 (Men\'s Casual Shirt)\n- Product ID: 1 (Men\'s Casual Shirt) - Duplicate of the first result, but since it\'s the same product, it\'s included again\n- Product ID: 4 (Women\'s Jeans)\n- Product ID: 3 (Women\'s Floral Dress)\n- Product ID: 11 (Boxy Oversized Tee)\n\nThese products are relevant because they match the user\'s query for a \"casual blue shirt\" and are also related to the user\'s search history',1.111),(14,1,'casual blue shirt',2,'2025-08-20 23:21:23','Based on the user\'s query and search history, here are the most relevant product IDs:\n\n1, 1, 4 \n\nThese product IDs correspond to the following products:\n- Product ID: 1 | Men\'s Casual Shirt (Blue)\n- Product ID: 1 | Men\'s Casual Shirt (Blue) (Duplicate query, hence included)\n- Product ID: 4 | Women\'s Jeans (Blue)\n\nThese products match the user\'s query for a \"casual blue shirt\" and are relevant based on their search history for similar products.',0.768),(15,1,'blue shirt',2,'2025-08-28 06:10:50','Based on the user\'s query and search history, the most relevant product IDs are:\n\n1, 1, 4 \n\nThese product IDs correspond to the following products:\n- Product ID: 1 | Men\'s Casual Shirt\n- Product ID: 1 | Men\'s Casual Shirt (since it\'s the same product, it\'s listed twice due to the user\'s search history)\n- Product ID: 4 | Women\'s Jeans \n\nHowever, since the user\'s query is \"blue shirt\" and the search history is about casual blue shirts, I will prioritize the product IDs related to blue shirts. \n\nSo, the final list of product IDs is: 1, 1',1.185);
 /*!40000 ALTER TABLE `search_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -353,7 +359,7 @@ CREATE TABLE `user_search_history` (
   KEY `idx_user_search_history_user_id` (`user_id`),
   KEY `idx_user_search_history_created_at` (`created_at`),
   CONSTRAINT `user_search_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -362,7 +368,7 @@ CREATE TABLE `user_search_history` (
 
 LOCK TABLES `user_search_history` WRITE;
 /*!40000 ALTER TABLE `user_search_history` DISABLE KEYS */;
-INSERT INTO `user_search_history` VALUES (1,1,'men\'s shirt','2025-08-20 22:19:47'),(2,1,'men\'s shirt','2025-08-20 22:20:14'),(3,1,'women\'s dress red color','2025-08-20 22:20:18'),(4,1,'casual wear under 3000 rupees','2025-08-20 22:20:22'),(5,1,'formal trouser black','2025-08-20 22:20:26'),(6,1,'saree traditional','2025-08-20 22:20:29'),(7,1,'oversized tee white','2025-08-20 22:20:33'),(8,1,'sportswear for men','2025-08-20 22:20:37'),(9,1,'blue jeans women','2025-08-20 22:20:40'),(10,1,'party dress','2025-08-20 22:20:43'),(11,1,'affordable shirts','2025-08-20 22:20:48'),(12,1,'casual blue shirt','2025-08-20 22:36:20'),(13,1,'casual blue shirt','2025-08-20 23:19:11'),(14,1,'casual blue shirt','2025-08-20 23:21:22');
+INSERT INTO `user_search_history` VALUES (1,1,'men\'s shirt','2025-08-20 22:19:47'),(2,1,'men\'s shirt','2025-08-20 22:20:14'),(3,1,'women\'s dress red color','2025-08-20 22:20:18'),(4,1,'casual wear under 3000 rupees','2025-08-20 22:20:22'),(5,1,'formal trouser black','2025-08-20 22:20:26'),(6,1,'saree traditional','2025-08-20 22:20:29'),(7,1,'oversized tee white','2025-08-20 22:20:33'),(8,1,'sportswear for men','2025-08-20 22:20:37'),(9,1,'blue jeans women','2025-08-20 22:20:40'),(10,1,'party dress','2025-08-20 22:20:43'),(11,1,'affordable shirts','2025-08-20 22:20:48'),(12,1,'casual blue shirt','2025-08-20 22:36:20'),(13,1,'casual blue shirt','2025-08-20 23:19:11'),(14,1,'casual blue shirt','2025-08-20 23:21:22'),(15,1,'blue shirt','2025-08-28 06:10:49');
 /*!40000 ALTER TABLE `user_search_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -418,7 +424,7 @@ CREATE TABLE `wishlist` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `wishlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `wishlist_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -427,7 +433,7 @@ CREATE TABLE `wishlist` (
 
 LOCK TABLES `wishlist` WRITE;
 /*!40000 ALTER TABLE `wishlist` DISABLE KEYS */;
-INSERT INTO `wishlist` VALUES (1,1,3,'2025-07-06 10:15:05'),(2,1,11,'2025-07-07 06:50:17');
+INSERT INTO `wishlist` VALUES (1,1,3,'2025-07-06 10:15:05'),(2,1,11,'2025-07-07 06:50:17'),(3,4,13,'2025-08-28 06:05:27');
 /*!40000 ALTER TABLE `wishlist` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -440,4 +446,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-28  0:12:18
+-- Dump completed on 2025-08-28 11:45:21

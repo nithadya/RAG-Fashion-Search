@@ -10,6 +10,7 @@ from flask_cors import CORS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -27,8 +28,11 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 
-# Enable CORS for all routes
-CORS(app, origins=['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080'])
+# Enable CORS for all routes - allow file:// origins for testing
+CORS(app, 
+     origins=['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'null'],
+     methods=['GET', 'POST', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization'])
 
 # Database configuration
 DB_CONFIG = {
@@ -529,25 +533,174 @@ def calculate_preference_scores(product_ids, preferences, query):
     
     return scores
 
-@app.route('/vector-store/stats', methods=['GET'])
-def vector_store_stats():
-    """Get statistics about the vector store"""
-    if not vector_store:
-        return jsonify({'error': 'Vector store not initialized'}), 500
+@app.route('/vector-store/refresh', methods=['POST'])
+def refresh_vector_store():
+    """Refresh the vector store with latest product data"""
+    global vector_store, retriever, rag_chain
     
     try:
-        # Get basic statistics
-        index = vector_store.index
-        total_vectors = index.ntotal
+        print("🔄 Starting vector store refresh...")
+        
+        # Recreate the vector store with updated product data
+        success = create_vector_store_from_db()
+        
+        if success:
+            # Reinitialize the RAG system components
+            initialize_success = initialize_rag_system()
+            
+            if initialize_success:
+                print("✅ Vector store and RAG system refreshed successfully!")
+                
+                # Get updated stats
+                index = vector_store.index if vector_store else None
+                total_vectors = index.ntotal if index else 0
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Vector store refreshed successfully',
+                    'total_vectors': total_vectors,
+                    'timestamp': time.time()
+                })
+            else:
+                return jsonify({
+                    'success': False, 
+                    'message': 'Vector store created but RAG system initialization failed'
+                }), 500
+        else:
+            return jsonify({
+                'success': False, 
+                'message': 'Failed to refresh vector store'
+            }), 500
+            
+    except Exception as e:
+        print(f"❌ Vector store refresh failed: {e}")
+        return jsonify({
+            'success': False, 
+            'message': f'Vector store refresh failed: {str(e)}'
+        }), 500
+
+@app.route('/vector-store/stats', methods=['GET'])
+def vector_store_stats():
+    """Get vector store statistics"""
+    try:
+        global vector_store
+        
+        if vector_store is None:
+            return jsonify({
+                "total_vectors": 0,
+                "status": "empty",
+                "message": "Vector store is not initialized"
+            })
+        
+        # Try to get vector count from FAISS index
+        total_vectors = vector_store.index.ntotal if hasattr(vector_store, 'index') else 0
         
         return jsonify({
-            'total_vectors': total_vectors,
-            'vector_store_type': 'FAISS',
-            'embedding_model': os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
-            'llm_provider': current_provider,
-            'llm_model': get_current_model_name(),
-            'status': 'ready'
+            "total_vectors": total_vectors,
+            "status": "active" if total_vectors > 0 else "empty",
+            "message": f"Vector store contains {total_vectors} vectors"
         })
+        
+    except Exception as e:
+        return jsonify({
+            "total_vectors": 0,
+            "status": "error",
+            "message": f"Error getting vector store stats: {str(e)}"
+        })
+
+def create_vector_store_from_db():
+    """Create vector store from current database content"""
+    try:
+        # Get database connection
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Fetch all products with category information
+        cursor.execute('''
+            SELECT p.id, p.name, p.description, p.brand, p.color, p.size, 
+                   p.occasion, p.gender, p.price, p.discount_price,
+                   c.name as category_name 
+            FROM products p 
+            LEFT JOIN categories c ON p.category_id = c.id 
+            WHERE p.stock > 0
+            ORDER BY p.id
+        ''')
+        products = cursor.fetchall()
+        print(f"📦 Fetched {len(products)} products from database")
+        
+        if not products:
+            print("❌ No products found in database")
+            return False
+        
+        # Convert products to LangChain Document format
+        documents = []
+        for product in products:
+            # Create rich product description for better semantic search
+            page_content_parts = [
+                f"Product: {product['name']}",
+                f"Category: {product.get('category_name', 'Unknown')}",
+                f"Description: {product.get('description', 'No description available')}"
+            ]
+            
+            # Add optional details if they exist
+            if product.get('brand'):
+                page_content_parts.append(f"Brand: {product['brand']}")
+            if product.get('color'):
+                page_content_parts.append(f"Color: {product['color']}")
+            if product.get('size'):
+                page_content_parts.append(f"Size: {product['size']}")
+            if product.get('occasion'):
+                page_content_parts.append(f"Occasion: {product['occasion']}")
+            if product.get('gender'):
+                page_content_parts.append(f"Gender: {product['gender']}")
+            
+            # Price information
+            price = product.get('discount_price') or product.get('price')
+            if price:
+                page_content_parts.append(f"Price: Rs. {price}")
+            
+            page_content = ". ".join(page_content_parts)
+            
+            # Metadata for retrieval
+            metadata = {
+                'product_id': product['id'],
+                'category': product.get('category_name', 'Unknown'),
+                'brand': product.get('brand', ''),
+                'price': float(price) if price else 0.0,
+                'gender': product.get('gender', ''),
+                'color': product.get('color', ''),
+                'occasion': product.get('occasion', '')
+            }
+            
+            documents.append(Document(page_content=page_content, metadata=metadata))
+        
+        # Initialize embeddings (reuse if already initialized)
+        embedding_model = os.getenv('EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
+        embeddings = HuggingFaceEmbeddings(
+            model_name=embedding_model,
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        
+        # Create new FAISS vector store
+        global vector_store
+        print("🔄 Creating new FAISS vector store...")
+        vector_store = FAISS.from_documents(documents, embeddings)
+        
+        # Save to disk
+        vector_store_path = os.getenv('VECTOR_STORE_PATH', 'faiss_index')
+        vector_store.save_local(vector_store_path)
+        print(f"💾 Vector store saved to '{vector_store_path}'")
+        
+        # Cleanup database connection
+        cursor.close()
+        conn.close()
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error creating vector store from DB: {e}")
+        return False
         
     except Exception as e:
         return jsonify({'error': f'Error getting vector store stats: {str(e)}'}), 500

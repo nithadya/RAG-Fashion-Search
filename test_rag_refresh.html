@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test RAG Refresh</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>RAG Vector Store Test</h1>
+    
+    <button class="btn" onclick="testRefresh()">Refresh Vector Store</button>
+    <button class="btn" onclick="testStats()">Check Stats</button>
+    <button class="btn" onclick="testSearch()">Test Search</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testRefresh() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="result">Refreshing vector store...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/vector-store/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="result">
+                        <h3>Refresh Result:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testStats() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="result">Getting vector store stats...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/vector-store/stats');
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="result">
+                        <h3>Vector Store Stats:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testSearch() {
+            const query = prompt("Enter search query:", "new hoodie");
+            if (!query) return;
+            
+            const results = document.getElementById('results');
+            results.innerHTML = `<div class="result">Searching for "${query}"...</div>`;
+            
+            try {
+                const response = await fetch('http://localhost:5000/search_with_preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        user_id: 0,
+                        preferences: {}
+                    })
+                });
+                
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="result">
+                        <h3>Search Results for "${query}":</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

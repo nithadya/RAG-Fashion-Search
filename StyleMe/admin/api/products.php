@@ -156,10 +156,14 @@ function createProduct() {
         
         logAdminActivity('CREATE_PRODUCT', "Created product: $name");
         
+        // Automatically refresh RAG vector store after adding new product
+        $ragRefreshResult = refreshRAGVectorStore();
+        
         return [
             'success' => true,
-            'message' => 'Product created successfully',
-            'id' => $db->lastInsertId()
+            'message' => 'Product created successfully' . ($ragRefreshResult['success'] ? ' and RAG updated' : ' (RAG update failed)'),
+            'id' => $db->lastInsertId(),
+            'rag_updated' => $ragRefreshResult['success']
         ];
         
     } catch (Exception $e) {
@@ -214,9 +218,13 @@ function updateProduct() {
         
         logAdminActivity('UPDATE_PRODUCT', "Updated product: $name (ID: $id)");
         
+        // Automatically refresh RAG vector store after updating product
+        $ragRefreshResult = refreshRAGVectorStore();
+        
         return [
             'success' => true,
-            'message' => 'Product updated successfully'
+            'message' => 'Product updated successfully' . ($ragRefreshResult['success'] ? ' and RAG updated' : ' (RAG update failed)'),
+            'rag_updated' => $ragRefreshResult['success']
         ];
         
     } catch (Exception $e) {
@@ -251,14 +259,71 @@ function deleteProduct() {
         
         logAdminActivity('DELETE_PRODUCT', "Deleted product: {$product['name']} (ID: $id)");
         
+        // Automatically refresh RAG vector store after deleting product
+        $ragRefreshResult = refreshRAGVectorStore();
+        
         return [
             'success' => true,
-            'message' => 'Product deleted successfully'
+            'message' => 'Product deleted successfully' . ($ragRefreshResult['success'] ? ' and RAG updated' : ' (RAG update failed)'),
+            'rag_updated' => $ragRefreshResult['success']
         ];
         
     } catch (Exception $e) {
         error_log("Delete product error: " . $e->getMessage());
         return ['success' => false, 'message' => 'Failed to delete product'];
+    }
+}
+
+function refreshRAGVectorStore() {
+    try {
+        $ragServiceUrl = 'http://localhost:5000';
+        $endpoint = '/vector-store/refresh';
+        
+        // Use cURL to call the RAG service refresh endpoint
+        $ch = curl_init($ragServiceUrl . $endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Allow 60 seconds for refresh
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([]));
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+        
+        if ($curlError) {
+            error_log("RAG refresh cURL error: " . $curlError);
+            return [
+                'success' => false,
+                'message' => 'Failed to connect to RAG service: ' . $curlError
+            ];
+        }
+        
+        if ($httpCode === 200) {
+            $ragResponse = json_decode($response, true);
+            return [
+                'success' => true,
+                'message' => 'RAG vector store refreshed successfully',
+                'rag_response' => $ragResponse
+            ];
+        } else {
+            error_log("RAG refresh HTTP error: " . $httpCode . " - " . $response);
+            return [
+                'success' => false,
+                'message' => 'RAG service returned error: ' . $httpCode
+            ];
+        }
+        
+    } catch (Exception $e) {
+        error_log("RAG refresh exception: " . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Error refreshing RAG system: ' . $e->getMessage()
+        ];
     }
 }
 ?>

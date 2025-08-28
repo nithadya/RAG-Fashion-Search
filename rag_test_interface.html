@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,23 +13,27 @@
             padding: 20px;
             background: #f5f5f5;
         }
+
         .container {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
+
         h1 {
             color: #333;
             text-align: center;
             margin-bottom: 30px;
         }
+
         h2 {
             color: #555;
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
         }
+
         .search-box {
             width: 100%;
             padding: 12px;
@@ -37,10 +42,12 @@
             font-size: 16px;
             margin-bottom: 10px;
         }
+
         .search-box:focus {
             border-color: #007bff;
             outline: none;
         }
+
         .btn {
             background: #007bff;
             color: white;
@@ -51,15 +58,19 @@
             font-size: 16px;
             margin: 5px;
         }
+
         .btn:hover {
             background: #0056b3;
         }
+
         .btn-secondary {
             background: #6c757d;
         }
+
         .btn-secondary:hover {
             background: #545b62;
         }
+
         .results {
             background: #f8f9fa;
             padding: 15px;
@@ -67,33 +78,39 @@
             margin-top: 20px;
             border-left: 4px solid #007bff;
         }
+
         .error {
             background: #f8d7da;
             color: #721c24;
             border-left-color: #dc3545;
         }
+
         .success {
             background: #d4edda;
             color: #155724;
             border-left-color: #28a745;
         }
+
         .preference-group {
             margin: 15px 0;
             padding: 15px;
             background: #f8f9fa;
             border-radius: 6px;
         }
+
         .preference-group label {
             display: block;
             font-weight: bold;
             margin-bottom: 8px;
             color: #555;
         }
+
         .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
+
         .tag {
             background: #e9ecef;
             padding: 6px 12px;
@@ -102,13 +119,16 @@
             transition: all 0.2s;
             font-size: 14px;
         }
+
         .tag:hover {
             background: #dee2e6;
         }
+
         .tag.active {
             background: #007bff;
             color: white;
         }
+
         .budget-input {
             width: 100px;
             padding: 8px;
@@ -116,16 +136,19 @@
             border-radius: 4px;
             margin: 0 10px;
         }
+
         .example-queries {
             background: #e3f2fd;
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
         }
+
         .example-queries h4 {
             margin-top: 0;
             color: #1976d2;
         }
+
         .example-query {
             background: white;
             padding: 8px 12px;
@@ -134,14 +157,17 @@
             cursor: pointer;
             border-left: 3px solid #2196f3;
         }
+
         .example-query:hover {
             background: #f5f5f5;
         }
+
         .loading {
             text-align: center;
             color: #666;
             font-style: italic;
         }
+
         .product-id {
             background: #28a745;
             color: white;
@@ -154,20 +180,20 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🔍 RAG Search Test - StyleMe</h1>
-        
+
         <!-- Simple Search -->
         <div class="container">
             <h2>Option 1: Simple Query Search</h2>
             <p>Just enter your search query - no additional parameters needed!</p>
-            
-            <input type="text" id="simpleQuery" class="search-box" 
-                   placeholder="e.g., casual blue shirt for office">
+
+            <input type="text" id="simpleQuery" class="search-box" placeholder="e.g., casual blue shirt for office">
             <button class="btn" onclick="performSimpleSearch()">Search</button>
             <button class="btn btn-secondary" onclick="clearResults('simpleResults')">Clear</button>
-            
+
             <div class="example-queries">
                 <h4>📝 Try These Queries:</h4>
                 <div class="example-query" onclick="setQuery('simpleQuery', 'casual blue shirt for office')">
@@ -183,7 +209,7 @@
                     party dress in red or black
                 </div>
             </div>
-            
+
             <div id="simpleResults"></div>
         </div>
 
@@ -191,10 +217,10 @@
         <div class="container">
             <h2>Option 2: Enhanced Search with Preferences</h2>
             <p>Add your preferences to get more personalized results!</p>
-            
-            <input type="text" id="enhancedQuery" class="search-box" 
-                   placeholder="e.g., comfortable shirt for office meetings">
-            
+
+            <input type="text" id="enhancedQuery" class="search-box"
+                placeholder="e.g., comfortable shirt for office meetings">
+
             <!-- Style Preferences -->
             <div class="preference-group">
                 <label>👔 Style Preferences:</label>
@@ -252,7 +278,7 @@
             <button class="btn" onclick="performEnhancedSearch()">Enhanced Search</button>
             <button class="btn btn-secondary" onclick="clearResults('enhancedResults')">Clear</button>
             <button class="btn btn-secondary" onclick="resetPreferences()">Reset Preferences</button>
-            
+
             <div id="enhancedResults"></div>
         </div>
     </div>
@@ -294,11 +320,11 @@
         // Get selected preferences
         function getSelectedPreferences() {
             const stylePrefs = Array.from(document.querySelectorAll('.preference-group:nth-of-type(1) .tag.active'))
-                                   .map(tag => tag.dataset.value);
+                .map(tag => tag.dataset.value);
             const colorPrefs = Array.from(document.querySelectorAll('.preference-group:nth-of-type(2) .tag.active'))
-                                   .map(tag => tag.dataset.value);
+                .map(tag => tag.dataset.value);
             const occasion = document.querySelector('.preference-group:nth-of-type(4) .tag.active')?.dataset.value || 'casual';
-            
+
             return {
                 style_preferences: stylePrefs,
                 color_preferences: colorPrefs,
@@ -311,7 +337,7 @@
         // Display results
         function displayResults(containerId, data, type) {
             const container = document.getElementById(containerId);
-            
+
             if (data.success === false) {
                 container.innerHTML = `
                     <div class="results error">
@@ -325,7 +351,7 @@
 
             const productIds = data.product_ids || [];
             const processingTime = data.processing_time || 0;
-            
+
             container.innerHTML = `
                 <div class="results success">
                     <h4>✅ ${type} Search Results</h4>
@@ -421,13 +447,14 @@
         }
 
         // Enter key support
-        document.getElementById('simpleQuery').addEventListener('keypress', function(e) {
+        document.getElementById('simpleQuery').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performSimpleSearch();
         });
 
-        document.getElementById('enhancedQuery').addEventListener('keypress', function(e) {
+        document.getElementById('enhancedQuery').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performEnhancedSearch();
         });
     </script>
 </body>
+
 </html>

@@ -126,7 +126,6 @@ try {
     } else {
         throw new Exception('Failed to save preferences to database');
     }
-
 } catch (Exception $e) {
     error_log("Error saving user preferences: " . $e->getMessage());
 

@@ -34,4 +34,3 @@ if (!empty($output)) {
         echo "\nRaw output (hex): " . bin2hex($output);
     }
 }
-?>

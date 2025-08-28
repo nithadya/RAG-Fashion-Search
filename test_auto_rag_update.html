@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-RAG Update Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 3px; }
+        .btn:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .log { background: #f8f9fa; padding: 10px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Auto-RAG Update System Test</h1>
+    <p>This page tests the automatic RAG vector store refresh when products are added, updated, or deleted.</p>
+
+    <div class="section">
+        <h3>📊 Current Status</h3>
+        <button class="btn" onclick="checkStatus()">Check RAG Status</button>
+        <button class="btn" onclick="manualRefresh()">Manual Refresh</button>
+        <div id="statusResult"></div>
+    </div>
+
+    <div class="section">
+        <h3>🔍 Test Search</h3>
+        <p>Search for products to see what's currently in the RAG system:</p>
+        <input type="text" id="searchQuery" placeholder="Enter search query..." style="width: 300px; padding: 8px; margin-right: 10px;">
+        <button class="btn" onclick="testSearch()">Search</button>
+        <div id="searchResult"></div>
+    </div>
+
+    <div class="section">
+        <h3>📝 Instructions for Testing Auto-Update</h3>
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 5px;">
+            <h4>To test the automatic RAG refresh system:</h4>
+            <ol>
+                <li><strong>Start your PHP server</strong> (if not already running)</li>
+                <li><strong>Make sure RAG service is running</strong> (you can see it's working above)</li>
+                <li><strong>Go to your admin panel</strong> and add/update/delete a product</li>
+                <li><strong>Come back here and search</strong> for the new product - it should appear immediately!</li>
+            </ol>
+            
+            <p><strong>What's different now:</strong></p>
+            <ul>
+                <li>✅ When you <strong>ADD</strong> a product → RAG automatically updates</li>
+                <li>✅ When you <strong>UPDATE</strong> a product → RAG automatically updates</li>
+                <li>✅ When you <strong>DELETE</strong> a product → RAG automatically updates</li>
+                <li>✅ No manual refresh needed anymore!</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>📋 System Log</h3>
+        <button class="btn" onclick="clearLog()">Clear Log</button>
+        <div id="systemLog" class="log">
+            System initialized. Ready for testing...
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('systemLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#007bff',
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107'
+            };
+            
+            logDiv.innerHTML += `<div style="color: ${colors[type] || colors.info};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('systemLog').innerHTML = 'Log cleared...';
+        }
+
+        async function checkStatus() {
+            const resultDiv = document.getElementById('statusResult');
+            resultDiv.innerHTML = '<div class="result">Checking RAG service status...</div>';
+            log('Checking RAG service status...');
+
+            try {
+                // Check if RAG service is running
+                const healthResponse = await fetch('http://localhost:5000/');
+                const healthData = await healthResponse.json();
+                log('RAG service is online: ' + healthData.message, 'success');
+
+                // Get vector store stats
+                const statsResponse = await fetch('http://localhost:5000/vector-store/stats');
+                const statsData = await statsResponse.json();
+                log(`Vector store contains ${statsData.total_vectors} products`, 'info');
+
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <h4>✅ RAG Service Status</h4>
+                        <p><strong>Service:</strong> ${healthData.message}</p>
+                        <p><strong>Vector Count:</strong> ${statsData.total_vectors} products indexed</p>
+                        <p><strong>Status:</strong> ${statsData.status}</p>
+                        <p><strong>Auto-update:</strong> Ready for product changes</p>
+                    </div>
+                `;
+            } catch (error) {
+                log('Error checking RAG service: ' + error.message, 'error');
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>❌ RAG Service Error</h4>
+                        <p>Cannot connect to RAG service at localhost:5000</p>
+                        <p>Make sure the RAG service is running!</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function manualRefresh() {
+            const resultDiv = document.getElementById('statusResult');
+            log('Starting manual vector store refresh...');
+
+            try {
+                const response = await fetch('http://localhost:5000/vector-store/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`Manual refresh completed: ${data.total_vectors} products indexed`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>✅ Manual Refresh Complete</h4>
+                            <p>${data.message}</p>
+                            <p>Vector Count: ${data.total_vectors}</p>
+                        </div>
+                    `;
+                } else {
+                    log('Manual refresh failed: ' + data.message, 'error');
+                    resultDiv.innerHTML = `<div class="result error">❌ Refresh failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                log('Manual refresh error: ' + error.message, 'error');
+                resultDiv.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="result">Searching...</div>';
+            log(`Searching for: "${query}"`);
+
+            try {
+                const response = await fetch('http://localhost:5000/search_with_preferences', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        user_id: 0,
+                        preferences: {}
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.product_ids.length > 0) {
+                    log(`Found ${data.product_ids.length} products for "${query}"`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>✅ Search Results (${data.product_ids.length} found)</h4>
+                            <p><strong>Query:</strong> "${query}"</p>
+                            <p><strong>Product IDs:</strong> ${data.product_ids.join(', ')}</p>
+                            <p><strong>Scores:</strong> ${data.matching_scores.map(s => s.toFixed(2)).join(', ')}</p>
+                            <p><strong>Processing Time:</strong> ${data.processing_time} seconds</p>
+                        </div>
+                    `;
+                } else {
+                    log(`No results found for "${query}"`, 'warning');
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <h4>ℹ️ No Results Found</h4>
+                            <p>No products found for "${query}"</p>
+                            <p>Try adding a product with this keyword and test the auto-update!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                log('Search error: ' + error.message, 'error');
+                resultDiv.innerHTML = `<div class="result error">❌ Search failed: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-check status on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkStatus, 1000);
+        });
+    </script>
+</body>
+</html>

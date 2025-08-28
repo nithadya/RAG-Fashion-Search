@@ -1,84 +1,189 @@
 :root {
-    --primary-color: #0056b3;
-    --secondary-color: #6c757d;
-    --accent-color: #ff6b6b;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+  --primary-color: #0056b3;
+  --secondary-color: #6c757d;
+  --accent-color: #ff6b6b;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
 }
 
 .navbar-brand {
-    font-weight: 700;
-    color: var(--primary-color);
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
 .product-card {
-    transition: transform 0.3s, box-shadow 0.3s;
-    margin-bottom: 20px;
-    border: none;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .product-img {
-    height: 200px;
-    object-fit: cover;
+  height: 200px;
+  object-fit: cover;
 }
 
 .price {
-    font-weight: bold;
-    color: var(--primary-color);
+  font-weight: bold;
+  color: var(--primary-color);
 }
 
 .discount-price {
-    text-decoration: line-through;
-    color: var(--secondary-color);
-    font-size: 0.9rem;
+  text-decoration: line-through;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
 }
 
 .badge-sale {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--accent-color);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
 }
 
 .filter-card {
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .filter-title {
-    font-weight: 600;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+  font-weight: 600;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Collapsible behavior */
+.filter-card.collapsed {
+  padding-bottom: 10px;
+}
+.filter-card.collapsed > :not(.filter-title) {
+  display: none !important;
+}
+.filter-collapse-toggle {
+  color: #888;
+  transition: color 0.2s;
+}
+.filter-collapse-toggle:hover {
+  color: var(--primary-color);
+}
+
+/* Sidebar container enhancements */
+#filtersSidebar {
+  position: relative;
+}
+
+/* Mobile slide-in */
+@media (max-width: 991.98px) {
+  #filtersSidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #fff;
+    z-index: 1050;
+    padding: 80px 15px 30px 15px;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.12);
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #filtersSidebar.open {
+    left: 0;
+  }
+  body.filters-open {
+    overflow: hidden;
+  }
+  #toggleFilters {
+    position: relative;
+    z-index: 1060;
+  }
+}
+
+/* Filter header */
+.filter-header h5 {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.filter-header button {
+  color: #666;
+}
+.filter-header button:hover {
+  color: var(--primary-color);
+}
+
+/* Scrollbar styling (WebKit) */
+#filtersSidebar::-webkit-scrollbar {
+  width: 8px;
+}
+#filtersSidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+#filtersSidebar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+#filtersSidebar::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3;
+}
+
+/* Utility spacing inside filter cards */
+.filter-card .form-check {
+  margin-bottom: 6px;
+}
+.filter-card .form-check:last-child {
+  margin-bottom: 0;
+}
+.filter-card input[type="number"] {
+  font-size: 0.875rem;
+}
+
+/* Transition for icon rotation (handled by class swap) */
+.filter-collapse-toggle i {
+  transition: transform 0.25s ease;
+}
+
+/* Reset filters button */
+#resetFilters {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+#resetFilters:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .pagination .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .pagination .page-link {
-    color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
-    .filter-sidebar {
-        margin-bottom: 30px;
-    }
+  .filter-sidebar {
+    margin-bottom: 30px;
+  }
 }

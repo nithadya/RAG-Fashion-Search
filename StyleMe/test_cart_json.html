@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart API Test - JSON Support</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container my-5">
+        <h1>Cart API JSON Support Test</h1>
+        <p class="text-muted">This tests if the cart API can handle JSON data from RAG search results</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test 1: Add to Cart (JSON)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label>Product ID:</label>
+                            <input type="number" class="form-control" id="productId1" value="1" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label>Quantity:</label>
+                            <input type="number" class="form-control" id="quantity1" value="1" min="1">
+                        </div>
+                        <button class="btn btn-primary" onclick="testJSONAddToCart()">
+                            <i class="fas fa-cart-plus"></i> Add to Cart (JSON)
+                        </button>
+                        <div id="result1" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test 2: Add to Cart (Form Data)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label>Product ID:</label>
+                            <input type="number" class="form-control" id="productId2" value="1" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label>Quantity:</label>
+                            <input type="number" class="form-control" id="quantity2" value="1" min="1">
+                        </div>
+                        <button class="btn btn-secondary" onclick="testFormAddToCart()">
+                            <i class="fas fa-cart-plus"></i> Add to Cart (Form)
+                        </button>
+                        <div id="result2" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Current Cart Contents</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-info" onclick="loadCart()">
+                            <i class="fas fa-shopping-cart"></i> Reload Cart
+                        </button>
+                        <div id="cartContents" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        async function testJSONAddToCart() {
+            const productId = document.getElementById('productId1').value;
+            const quantity = document.getElementById('quantity1').value;
+            const resultDiv = document.getElementById('result1');
+            
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Testing JSON request...</div>';
+            
+            try {
+                const response = await fetch('api/cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'add',
+                        product_id: parseInt(productId),
+                        quantity: parseInt(quantity)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Success!</h6>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h6>⚠️ Failed</h6>
+                            <p>${data.message}</p>
+                            ${data.redirect ? '<small class="text-muted">Redirect required</small>' : ''}
+                        </div>
+                    `;
+                }
+                
+                loadCart(); // Refresh cart contents
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Error</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testFormAddToCart() {
+            const productId = document.getElementById('productId2').value;
+            const quantity = document.getElementById('quantity2').value;
+            const resultDiv = document.getElementById('result2');
+            
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Testing form request...</div>';
+            
+            const formData = new FormData();
+            formData.append('action', 'add');
+            formData.append('product_id', productId);
+            formData.append('quantity', quantity);
+            
+            try {
+                const response = await fetch('api/cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Success!</h6>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h6>⚠️ Failed</h6>
+                            <p>${data.message}</p>
+                            ${data.redirect ? '<small class="text-muted">Redirect required</small>' : ''}
+                        </div>
+                    `;
+                }
+                
+                loadCart(); // Refresh cart contents
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Error</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function loadCart() {
+            const cartDiv = document.getElementById('cartContents');
+            cartDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Loading cart...</p>';
+            
+            try {
+                const response = await fetch('api/cart.php?action=get');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const items = data.items || [];
+                    if (items.length > 0) {
+                        cartDiv.innerHTML = `
+                            <div class="alert alert-info">
+                                <h6>Cart Items (${items.length}):</h6>
+                                <ul class="mb-0">
+                                    ${items.map(item => 
+                                        `<li>${item.product_name} - Qty: ${item.quantity} - Rs. ${item.total_price || (item.price * item.quantity)}</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    } else {
+                        cartDiv.innerHTML = '<div class="alert alert-secondary">Cart is empty</div>';
+                    }
+                } else {
+                    cartDiv.innerHTML = `<div class="alert alert-warning">Failed to load cart: ${data.message}</div>`;
+                }
+            } catch (error) {
+                cartDiv.innerHTML = `<div class="alert alert-danger">Error loading cart: ${error.message}</div>`;
+            }
+        }
+        
+        // Load cart on page load
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+</html>

@@ -1,36 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web RAG Integration Test</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-        .test-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
-        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-        input, button { padding: 10px; margin: 5px; border-radius: 4px; border: 1px solid #ddd; }
-        button { background: #007bff; color: white; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
+
 <body>
     <h1>🔧 Web RAG Integration Test</h1>
-    
+
     <div class="test-section">
         <h3>1. Server Status Check</h3>
         <button onclick="checkServers()">Check Servers</button>
         <div id="serverStatus"></div>
     </div>
-    
+
     <div class="test-section">
         <h3>2. RAG Search Test</h3>
-        <input type="text" id="testQuery" placeholder="Enter search query (e.g., casual blue shirt)" value="casual blue shirt">
+        <input type="text" id="testQuery" placeholder="Enter search query (e.g., casual blue shirt)"
+            value="casual blue shirt">
         <button onclick="testRAGSearch()">Test RAG Search</button>
         <div id="ragResults"></div>
     </div>
-    
+
     <div class="test-section">
         <h3>3. Product API Test</h3>
         <button onclick="testProductAPI()">Test Product API</button>
@@ -41,46 +87,46 @@
         async function checkServers() {
             const statusDiv = document.getElementById('serverStatus');
             statusDiv.innerHTML = 'Checking servers...';
-            
+
             try {
                 // Check PHP server
                 const phpCheck = await fetch('http://localhost:8080/api/products.php?action=get_categories');
                 const phpStatus = phpCheck.ok ? '✅ PHP Server (8080)' : '❌ PHP Server (8080)';
-                
+
                 // Check RAG service
                 const ragCheck = await fetch('http://localhost:5000/');
                 const ragStatus = ragCheck.ok ? '✅ RAG Service (5000)' : '❌ RAG Service (5000)';
-                
+
                 statusDiv.innerHTML = `
                     <div class="test-result ${phpCheck.ok ? 'success' : 'error'}">${phpStatus}</div>
                     <div class="test-result ${ragCheck.ok ? 'success' : 'error'}">${ragStatus}</div>
                 `;
-                
+
             } catch (error) {
                 statusDiv.innerHTML = `<div class="test-result error">Error checking servers: ${error.message}</div>`;
             }
         }
-        
+
         async function testRAGSearch() {
             const query = document.getElementById('testQuery').value;
             const resultsDiv = document.getElementById('ragResults');
-            
+
             if (!query.trim()) {
                 resultsDiv.innerHTML = '<div class="test-result warning">Please enter a search query</div>';
                 return;
             }
-            
+
             resultsDiv.innerHTML = 'Testing RAG search...';
-            
+
             try {
                 const response = await fetch('http://localhost:5000/search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: query, user_id: 0 })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     resultsDiv.innerHTML = `
                         <div class="test-result success">
@@ -98,11 +144,11 @@
                 resultsDiv.innerHTML = `<div class="test-result error">Network Error: ${error.message}</div>`;
             }
         }
-        
+
         async function testProductAPI() {
             const resultsDiv = document.getElementById('apiResults');
             resultsDiv.innerHTML = 'Testing Product API...';
-            
+
             try {
                 // Test with sample product IDs
                 const testIds = [1, 2, 3];
@@ -114,9 +160,9 @@
                         product_ids: testIds
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     resultsDiv.innerHTML = `
                         <div class="test-result success">
@@ -132,9 +178,10 @@
                 resultsDiv.innerHTML = `<div class="test-result error">Network Error: ${error.message}</div>`;
             }
         }
-        
+
         // Auto-check servers on load
         window.onload = checkServers;
     </script>
 </body>
+
 </html>

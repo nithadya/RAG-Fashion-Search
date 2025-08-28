@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Categories API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>Categories API Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Direct Categories API</h3>
+        <button onclick="testDirectAPI()">Test Direct API</button>
+        <div id="directResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Products API - Get Categories</h3>
+        <button onclick="testProductsAPI()">Test Products API</button>
+        <div id="productsResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Featured Categories</h3>
+        <button onclick="testFeaturedCategories()">Test Featured Categories</button>
+        <div id="featuredResult"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function testDirectAPI() {
+            $('#directResult').html('<p>Loading...</p>');
+            
+            $.ajax({
+                url: 'test_categories_api.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#directResult').html(`
+                        <div class="success">
+                            <h4>✅ Success!</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `);
+                },
+                error: function(xhr, status, error) {
+                    $('#directResult').html(`
+                        <div class="error">
+                            <h4>❌ Error!</h4>
+                            <p>Status: ${status}</p>
+                            <p>Error: ${error}</p>
+                            <pre>${xhr.responseText}</pre>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function testProductsAPI() {
+            $('#productsResult').html('<p>Loading...</p>');
+            
+            $.ajax({
+                url: 'api/products.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#productsResult').html(`
+                        <div class="success">
+                            <h4>✅ Success!</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `);
+                },
+                error: function(xhr, status, error) {
+                    $('#productsResult').html(`
+                        <div class="error">
+                            <h4>❌ Error!</h4>
+                            <p>Status: ${status}</p>
+                            <p>Error: ${error}</p>
+                            <pre>${xhr.responseText}</pre>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function testFeaturedCategories() {
+            $('#featuredResult').html('<p>Loading...</p>');
+            
+            $.ajax({
+                url: 'api/products.php?action=featured_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#featuredResult').html(`
+                        <div class="success">
+                            <h4>✅ Success!</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `);
+                },
+                error: function(xhr, status, error) {
+                    $('#featuredResult').html(`
+                        <div class="error">
+                            <h4>❌ Error!</h4>
+                            <p>Status: ${status}</p>
+                            <p>Error: ${error}</p>
+                            <pre>${xhr.responseText}</pre>
+                        </div>
+                    `);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
