@@ -27,8 +27,11 @@ class StyleMeRAGSearch {
     if (searchContainer.length === 0) {
       searchContainer = $(".container").first();
     }
-    
-    console.log("🎨 Injecting RAG search interface into:", searchContainer.length ? "found container" : "no container found");
+
+    console.log(
+      "🎨 Injecting RAG search interface into:",
+      searchContainer.length ? "found container" : "no container found"
+    );
     const enhancedSearchHTML = `
             <!-- Enhanced RAG Search Interface -->
             <div id="enhanced-rag-search" class="enhanced-search-container mb-4">
@@ -174,7 +177,7 @@ class StyleMeRAGSearch {
 
   setupEventListeners() {
     const searchInput = $("#intelligentSearchInput");
-    
+
     // Intelligent search button
     $("#intelligentSearchBtn").on("click", () => {
       this.performIntelligentSearch();
@@ -192,14 +195,16 @@ class StyleMeRAGSearch {
     searchInput.on("input", (e) => {
       clearTimeout(searchTimeout);
       const query = e.target.value.trim();
-      
+
       console.log("🔤 Search input changed:", query); // Debug log
-      
+
       if (query.length > 2) {
         // Show loading indicator immediately
-        $("#productList").html('<div class="col-12 text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><br><small class="text-muted mt-2">Searching products...</small></div>');
+        $("#productList").html(
+          '<div class="col-12 text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><br><small class="text-muted mt-2">Searching products...</small></div>'
+        );
         $("#searchResultsSummary").hide();
-        
+
         // Debounced search after 600ms of no typing
         searchTimeout = setTimeout(() => {
           console.log("🚀 Triggering async search for:", query); // Debug log
@@ -212,9 +217,11 @@ class StyleMeRAGSearch {
         console.log("🧹 Search cleared"); // Debug log
       } else {
         // Show suggestion for more characters
-        $("#productList").html('<div class="col-12 text-center text-muted py-4"><i class="fas fa-keyboard"></i><br>Type at least 3 characters to search...</div>');
+        $("#productList").html(
+          '<div class="col-12 text-center text-muted py-4"><i class="fas fa-keyboard"></i><br>Type at least 3 characters to search...</div>'
+        );
       }
-      
+
       this.handleSearchSuggestions(query);
     });
 
@@ -245,14 +252,14 @@ class StyleMeRAGSearch {
     $("#resetPreferences").on("click", () => {
       this.resetPreferences();
     });
-    
+
     // Initialize filter tokens
     this.initializeFilterTokens();
-    
+
     // Initialize voice search if available
     this.initializeVoiceSearch();
   }
-  
+
   initializeFilterTokens() {
     // Add filter tokens container after search input
     const filterTokensHTML = `
@@ -319,19 +326,19 @@ class StyleMeRAGSearch {
         </div>
       </div>
     `;
-    
+
     $("#enhanced-rag-search").append(filterTokensHTML);
-    
+
     // Setup filter token event listeners
     this.setupFilterTokenEvents();
   }
-  
+
   setupFilterTokenEvents() {
     // Toggle filters visibility
     $("#toggleFilters").on("click", () => {
       const container = $(".quick-filters");
       const btn = $("#toggleFilters");
-      
+
       if (container.is(":visible")) {
         container.slideUp();
         btn.html('<i class="fas fa-filter"></i> Show Filters');
@@ -340,23 +347,23 @@ class StyleMeRAGSearch {
         btn.html('<i class="fas fa-filter"></i> Hide Filters');
       }
     });
-    
+
     // Filter token selection
     $(document).on("click", ".filter-token", (e) => {
       const token = $(e.target);
       const type = token.data("type");
       const value = token.data("value");
-      
+
       // Toggle token state
       token.toggleClass("active");
-      
+
       // Update active filters display
       this.updateActiveFilters();
-      
+
       // Auto-update search input
       this.updateSearchInputWithFilters();
     });
-    
+
     // Clear all filters
     $("#clearFilters").on("click", () => {
       $(".filter-token").removeClass("active");
@@ -364,62 +371,66 @@ class StyleMeRAGSearch {
       this.updateSearchInputWithFilters();
     });
   }
-  
+
   updateActiveFilters() {
     const activeTokens = $(".filter-token.active");
     const activeFiltersContainer = $("#activeFiltersContainer");
     const activeFiltersDiv = $("#activeFilters");
-    
+
     if (activeTokens.length === 0) {
       activeFiltersDiv.hide();
       return;
     }
-    
+
     activeFiltersDiv.show();
     activeFiltersContainer.empty();
-    
+
     activeTokens.each((index, token) => {
       const $token = $(token);
       const type = $token.data("type");
       const value = $token.data("value");
       const text = $token.text();
-      
+
       const activeFilter = $(`
         <span class="active-filter" data-type="${type}" data-value="${value}">
           ${text}
           <i class="fas fa-times" data-remove="${type}-${value}"></i>
         </span>
       `);
-      
+
       activeFiltersContainer.append(activeFilter);
     });
-    
+
     // Handle individual filter removal
     $(".active-filter i").on("click", (e) => {
       const removeData = $(e.target).data("remove").split("-");
       const type = removeData[0];
       const value = removeData.slice(1).join("-");
-      
-      $(`.filter-token[data-type="${type}"][data-value="${value}"]`).removeClass("active");
+
+      $(
+        `.filter-token[data-type="${type}"][data-value="${value}"]`
+      ).removeClass("active");
       this.updateActiveFilters();
       this.updateSearchInputWithFilters();
     });
   }
-  
+
   updateSearchInputWithFilters() {
     const activeTokens = $(".filter-token.active");
     const currentInput = $("#intelligentSearchInput").val();
-    const baseQuery = currentInput.replace(/\s*(style|color|price|occasion):\s*\w+/gi, "").trim();
-    
+    const baseQuery = currentInput
+      .replace(/\s*(style|color|price|occasion):\s*\w+/gi, "")
+      .trim();
+
     let filterParts = [];
-    
+
     activeTokens.each((index, token) => {
       const $token = $(token);
       const type = $token.data("type");
       const value = $token.data("value");
-      
+
       // Convert filter tokens to natural language
-      switch(type) {
+      switch (type) {
         case "style":
           filterParts.push(value);
           break;
@@ -427,7 +438,7 @@ class StyleMeRAGSearch {
           filterParts.push(value + " color");
           break;
         case "price":
-          switch(value) {
+          switch (value) {
             case "under-1000":
               filterParts.push("under 1000 rupees");
               break;
@@ -447,69 +458,70 @@ class StyleMeRAGSearch {
           break;
       }
     });
-    
+
     let enhancedQuery = baseQuery;
     if (filterParts.length > 0) {
       enhancedQuery = baseQuery + " " + filterParts.join(" ");
     }
-    
+
     $("#intelligentSearchInput").val(enhancedQuery.trim());
   }
-  
+
   initializeVoiceSearch() {
     // Add voice search button if Web Speech API is supported
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
       const voiceButton = `
         <button class="btn btn-outline-info" id="voiceSearchBtn" title="Voice Search">
           <i class="fas fa-microphone"></i>
         </button>
       `;
-      
+
       $(".search-input-group .intelligent-search-btn").before(voiceButton);
-      
+
       // Initialize speech recognition
       this.initSpeechRecognition();
     }
   }
-  
+
   initSpeechRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = false;
       this.recognition.interimResults = false;
-      this.recognition.lang = 'en-US';
-      
+      this.recognition.lang = "en-US";
+
       this.recognition.onstart = () => {
         $("#voiceSearchBtn").addClass("recording");
         $("#voiceSearchBtn i").removeClass("fa-microphone").addClass("fa-stop");
         this.showToast("Listening... Speak your search query", "info");
       };
-      
+
       this.recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         $("#intelligentSearchInput").val(transcript);
-        
+
         // Show what was heard
         this.showToast(`Heard: "${transcript}"`, "success");
-        
+
         // Auto-perform search after a short delay
         setTimeout(() => {
           this.performIntelligentSearch();
         }, 1000);
       };
-      
+
       this.recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
         this.showToast("Voice search error. Please try again.", "error");
         this.resetVoiceButton();
       };
-      
+
       this.recognition.onend = () => {
         this.resetVoiceButton();
       };
-      
+
       // Voice search button click handler
       $("#voiceSearchBtn").on("click", () => {
         if ($("#voiceSearchBtn").hasClass("recording")) {
@@ -520,12 +532,12 @@ class StyleMeRAGSearch {
       });
     }
   }
-  
+
   resetVoiceButton() {
     $("#voiceSearchBtn").removeClass("recording");
     $("#voiceSearchBtn i").removeClass("fa-stop").addClass("fa-microphone");
   }
-  
+
   showToast(message, type = "info") {
     // Create toast if it doesn't exist
     if ($("#searchToast").length === 0) {
@@ -542,7 +554,7 @@ class StyleMeRAGSearch {
       `;
       $("body").append(toastHTML);
     }
-    
+
     // Update toast content and show
     $("#toastBody").text(message);
     const toast = new bootstrap.Toast($("#searchToast")[0]);
@@ -616,7 +628,7 @@ class StyleMeRAGSearch {
       query: query,
       preferences: preferences,
       user_id: this.currentUserId,
-      search_type: 'enhanced'
+      search_type: "enhanced",
     };
 
     console.log("🔍 Sending RAG search request:", payload);
@@ -640,7 +652,9 @@ class StyleMeRAGSearch {
       console.log("📦 RAG API response data:", data);
     } catch (jsonError) {
       console.error("JSON parse error:", jsonError);
-      throw new Error(`Invalid JSON response from RAG API: ${jsonError.message}`);
+      throw new Error(
+        `Invalid JSON response from RAG API: ${jsonError.message}`
+      );
     }
 
     // Handle error responses from the server
@@ -651,8 +665,11 @@ class StyleMeRAGSearch {
     }
 
     // Handle successful responses from the PHP API
-    console.log("✅ RAG search successful, products found:", data.products?.length || 0);
-    
+    console.log(
+      "✅ RAG search successful, products found:",
+      data.products?.length || 0
+    );
+
     return {
       products: data.products || [],
       matching_scores: data.matching_scores || [],
@@ -661,44 +678,45 @@ class StyleMeRAGSearch {
       ai_response: data.ai_response || "",
       total: data.results_count || 0,
       source: "rag",
-      search_type: data.search_type || 'rag'
+      search_type: data.search_type || "rag",
     };
   }
 
   async performRegularSearch(query) {
     // Get user preferences to enhance regular search
     const preferences = this.getUserPreferencesData();
-    
+
     // Build search URL with preferences
-    let searchUrl = `${this.apiUrl}/products.php?search=${encodeURIComponent(query)}&limit=20`;
-    
+    let searchUrl = `${this.apiUrl}/products.php?search=${encodeURIComponent(
+      query
+    )}&limit=20`;
+
     // Add budget filter if specified
     if (preferences.budget_min > 500 || preferences.budget_max < 50000) {
       searchUrl += `&budget_min=${preferences.budget_min}&budget_max=${preferences.budget_max}`;
     }
-    
+
     // Add category filter based on style preferences
     if (preferences.style_preferences.length > 0) {
-      searchUrl += `&styles=${preferences.style_preferences.join(',')}`;
+      searchUrl += `&styles=${preferences.style_preferences.join(",")}`;
     }
-    
+
     // Add color filter if specified
     if (preferences.color_preferences.length > 0) {
-      searchUrl += `&colors=${preferences.color_preferences.join(',')}`;
+      searchUrl += `&colors=${preferences.color_preferences.join(",")}`;
     }
-    
+
     // Add occasion if specified
-    if (preferences.occasion && preferences.occasion !== 'casual') {
+    if (preferences.occasion && preferences.occasion !== "casual") {
       searchUrl += `&occasion=${preferences.occasion}`;
     }
 
     const response = await fetch(searchUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Regular search error: ${response.status}`);
@@ -791,62 +809,94 @@ class StyleMeRAGSearch {
     }
 
     // Show results summary
-    const totalScore = products.reduce((sum, p) => sum + (p.similarity_score || 0), 0);
+    const totalScore = products.reduce(
+      (sum, p) => sum + (p.similarity_score || 0),
+      0
+    );
     const avgScore = totalScore / products.length;
-    const maxScore = Math.max(...products.map(p => p.similarity_score || 0));
+    const maxScore = Math.max(...products.map((p) => p.similarity_score || 0));
     const avgPercentage = Math.round((avgScore / 50) * 100); // 50 is estimated max score
-    
+
     let summaryHTML = `
       <div class="alert alert-info">
         <div class="row align-items-center">
           <div class="col-md-8">
             <i class="fas fa-info-circle"></i> Found ${products.length} products
-            ${source === 'rag' ? ' using AI-powered search' : ''}
+            ${source === "rag" ? " using AI-powered search" : ""}
           </div>
-          ${source === 'rag' ? `
+          ${
+            source === "rag"
+              ? `
           <div class="col-md-4">
             <div class="text-end">
               <small class="text-muted">Average Match:</small>
-              <strong class="ms-1" style="color: ${avgPercentage >= 70 ? '#198754' : avgPercentage >= 50 ? '#0dcaf0' : '#ffc107'}">
+              <strong class="ms-1" style="color: ${
+                avgPercentage >= 70
+                  ? "#198754"
+                  : avgPercentage >= 50
+                  ? "#0dcaf0"
+                  : "#ffc107"
+              }">
                 ${avgPercentage}%
               </strong>
               <div class="progress mt-1" style="height: 6px;">
                 <div class="progress-bar" role="progressbar" 
-                     style="width: ${avgPercentage}%; background-color: ${avgPercentage >= 70 ? '#198754' : avgPercentage >= 50 ? '#0dcaf0' : '#ffc107'}"
+                     style="width: ${avgPercentage}%; background-color: ${
+                  avgPercentage >= 70
+                    ? "#198754"
+                    : avgPercentage >= 50
+                    ? "#0dcaf0"
+                    : "#ffc107"
+                }"
                      aria-valuenow="${avgPercentage}" aria-valuemin="0" aria-valuemax="100">
                 </div>
               </div>
             </div>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
       </div>
     `;
-    
+
     $("#searchResultsSummary").html(summaryHTML).show();
 
     products.forEach((product, index) => {
       // Use the similarity_score from backend or fallback to matchingScores array
-      const matchingScore = product.similarity_score || matchingScores[index] || 0;
-      
-      console.log(`🔍 Product ${index}: "${product.name}", Raw Score: ${matchingScore}, From: ${product.similarity_score ? 'product property' : 'matchingScores array'}`);
-      
+      const matchingScore =
+        product.similarity_score || matchingScores[index] || 0;
+
+      console.log(
+        `🔍 Product ${index}: "${
+          product.name
+        }", Raw Score: ${matchingScore}, From: ${
+          product.similarity_score ? "product property" : "matchingScores array"
+        }`
+      );
+
       // Convert raw score to percentage (normalize based on max possible score)
       // Backend scoring: name matches (10 points each) + color (8) + category (6) + brand (5) + preferences (7)
       const maxPossibleScore = 50; // Estimated maximum for normalization
       const normalizedScore = Math.min(matchingScore / maxPossibleScore, 1.0);
       const matchPercentage = Math.round(normalizedScore * 100);
 
-      console.log(`📊 Normalized Score: ${normalizedScore.toFixed(2)}, Percentage: ${matchPercentage}%`);
+      console.log(
+        `📊 Normalized Score: ${normalizedScore.toFixed(
+          2
+        )}, Percentage: ${matchPercentage}%`
+      );
 
       // Enhanced match badge for RAG results with more granular scoring
       let matchBadge = "";
       let matchClass = "";
       let matchIcon = "";
-      
+
       if (source === "rag" && matchingScore > 0) {
-        console.log(`🎯 Creating match badge for RAG result with score ${matchingScore}`);
-        
+        console.log(
+          `🎯 Creating match badge for RAG result with score ${matchingScore}`
+        );
+
         if (matchPercentage >= 80) {
           matchBadge = `<div class="match-badge badge bg-success mb-2"><i class="fas fa-star"></i> ${matchPercentage}% Perfect Match</div>`;
           matchClass = "border-success shadow-sm";
@@ -872,25 +922,31 @@ class StyleMeRAGSearch {
           matchClass = "border-light";
           matchIcon = "fas fa-info text-muted";
         }
-        
-        console.log(`✨ Match badge created: ${matchBadge.substring(0, 50)}...`);
+
+        console.log(
+          `✨ Match badge created: ${matchBadge.substring(0, 50)}...`
+        );
       } else {
-        console.log(`❌ No match badge - Source: ${source}, Score: ${matchingScore}`);
+        console.log(
+          `❌ No match badge - Source: ${source}, Score: ${matchingScore}`
+        );
       }
 
       // Discount badge
       const discountPrice = parseFloat(product.discount_price || 0);
       const originalPrice = parseFloat(product.price || 0);
       const hasDiscount = discountPrice > 0 && discountPrice < originalPrice;
-      const discountPercentage = hasDiscount ? Math.round(((originalPrice - discountPrice) / originalPrice) * 100) : 0;
-      
-      const discountBadge = hasDiscount 
+      const discountPercentage = hasDiscount
+        ? Math.round(((originalPrice - discountPrice) / originalPrice) * 100)
+        : 0;
+
+      const discountBadge = hasDiscount
         ? `<div class="discount-badge badge bg-danger">${discountPercentage}% OFF</div>`
         : "";
 
       // Handle images with proper database paths
       let imageUrl = "assets/images/placeholder-product.jpg"; // Default fallback
-      
+
       if (product.image1) {
         // Check if image1 exists in uploads folder
         imageUrl = `assets/uploads/${product.image1}`;
@@ -899,14 +955,14 @@ class StyleMeRAGSearch {
       } else if (product.image3) {
         imageUrl = `assets/uploads/${product.image3}`;
       }
-      
+
       const imageTag = `<img src="${imageUrl}" alt="${product.name}" class="card-img-top product-image" 
                             style="height: 200px; object-fit: cover;" 
                             onerror="this.src='assets/images/placeholder-product.jpg'">`;
 
       // Price display
       const currentPrice = hasDiscount ? discountPrice : originalPrice;
-      const priceDisplay = hasDiscount 
+      const priceDisplay = hasDiscount
         ? `<span class="text-danger fw-bold">Rs.${currentPrice.toLocaleString()}</span>
            <span class="text-decoration-line-through text-muted ms-2">Rs.${originalPrice.toLocaleString()}</span>`
         : `<span class="fw-bold">Rs.${currentPrice.toLocaleString()}</span>`;
@@ -922,50 +978,86 @@ class StyleMeRAGSearch {
             </div>
             <div class="card-body d-flex flex-column">
               <div class="mb-2">
-                <small class="text-muted">${product.category_name || 'Fashion'}</small>
-                ${product.brand ? `<small class="text-muted"> • ${product.brand}</small>` : ''}
+                <small class="text-muted">${
+                  product.category_name || "Fashion"
+                }</small>
+                ${
+                  product.brand
+                    ? `<small class="text-muted"> • ${product.brand}</small>`
+                    : ""
+                }
               </div>
               <h6 class="card-title">${product.name}</h6>
               <div class="price mb-2">
                 ${priceDisplay}
               </div>
               
-              ${source === "rag" && matchingScore > 0 ? `
+              ${
+                source === "rag" && matchingScore > 0
+                  ? `
               <div class="match-info mb-2">
                 <div class="d-flex align-items-center justify-content-between">
                   <small class="text-muted">
                     <i class="${matchIcon}"></i> AI Match Score
                   </small>
-                  <small class="fw-bold" style="color: ${matchPercentage >= 70 ? '#198754' : matchPercentage >= 50 ? '#0dcaf0' : matchPercentage >= 30 ? '#ffc107' : '#6c757d'}">
+                  <small class="fw-bold" style="color: ${
+                    matchPercentage >= 70
+                      ? "#198754"
+                      : matchPercentage >= 50
+                      ? "#0dcaf0"
+                      : matchPercentage >= 30
+                      ? "#ffc107"
+                      : "#6c757d"
+                  }">
                     ${matchPercentage}%
                   </small>
                 </div>
                 <div class="progress progress-sm mt-1" style="height: 4px;">
                   <div class="progress-bar" role="progressbar" 
-                       style="width: ${matchPercentage}%; background-color: ${matchPercentage >= 70 ? '#198754' : matchPercentage >= 50 ? '#0dcaf0' : matchPercentage >= 30 ? '#ffc107' : '#6c757d'}"
+                       style="width: ${matchPercentage}%; background-color: ${
+                      matchPercentage >= 70
+                        ? "#198754"
+                        : matchPercentage >= 50
+                        ? "#0dcaf0"
+                        : matchPercentage >= 30
+                        ? "#ffc107"
+                        : "#6c757d"
+                    }"
                        aria-valuenow="${matchPercentage}" aria-valuemin="0" aria-valuemax="100">
                   </div>
                 </div>
-                ${product.match_explanation ? `
+                ${
+                  product.match_explanation
+                    ? `
                 <div class="match-details mt-1">
                   <small class="text-muted" style="font-size: 0.7rem; line-height: 1.2;">
                     <i class="fas fa-info-circle"></i> ${product.match_explanation}
                   </small>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
-              ` : ''}
+              `
+                  : ""
+              }
               
               <div class="mt-auto">
                 <div class="d-grid gap-2">
-                  <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="${product.id}">
+                  <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="${
+                    product.id
+                  }">
                     <i class="fas fa-shopping-cart"></i> Add to Cart
                   </button>
                   <div class="d-flex gap-1">
-                    <button class="btn btn-outline-secondary btn-sm flex-fill add-to-wishlist-btn" data-product-id="${product.id}">
+                    <button class="btn btn-outline-secondary btn-sm flex-fill add-to-wishlist-btn" data-product-id="${
+                      product.id
+                    }">
                       <i class="far fa-heart"></i>
                     </button>
-                    <a href="product-detail.html?id=${product.id}" class="btn btn-outline-primary btn-sm flex-fill">
+                    <a href="product-detail.html?id=${
+                      product.id
+                    }" class="btn btn-outline-primary btn-sm flex-fill">
                       <i class="fas fa-eye"></i> View
                     </a>
                   </div>
@@ -989,7 +1081,9 @@ class StyleMeRAGSearch {
     // Update page title with search results
     const query = $("#intelligentSearchInput").val().trim();
     if (query) {
-      $("#productListingTitle").html(`🔍 AI Search Results for: <em>"${query}"</em> (${count} items)`);
+      $("#productListingTitle").html(
+        `🔍 AI Search Results for: <em>"${query}"</em> (${count} items)`
+      );
     }
 
     $("#resultsCount").text(count);
@@ -1027,7 +1121,7 @@ class StyleMeRAGSearch {
       color_preferences: [],
       budget_min: parseInt($("#budgetMinSlider").val()),
       budget_max: parseInt($("#budgetMaxSlider").val()),
-      occasion: "casual"
+      occasion: "casual",
     };
 
     // Collect active style preferences
@@ -1060,20 +1154,20 @@ class StyleMeRAGSearch {
       const response = await fetch(
         `${this.apiUrl}/get_user_preferences.php?user_id=${this.currentUserId}`
       );
-      
+
       if (!response.ok) {
         console.log("HTTP error:", response.status, response.statusText);
         return;
       }
-      
+
       const responseText = await response.text();
-      
+
       // Check if response is empty
       if (!responseText.trim()) {
         console.log("Empty response from preferences API");
         return;
       }
-      
+
       // Try to parse JSON
       let data;
       try {
@@ -1083,7 +1177,7 @@ class StyleMeRAGSearch {
         console.error("Response text:", responseText);
         return;
       }
-      
+
       if (data.success && data.preferences) {
         this.applyPreferencesToUI(data.preferences);
         console.log("User preferences loaded successfully");
@@ -1300,11 +1394,24 @@ class StyleMeRAGSearch {
       .on("click", async function (e) {
         e.preventDefault();
         const productId = $(this).data("product-id");
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+
+        if (!productId) {
+          alert("Error: Invalid product ID");
+          return;
+        }
+
+        // Show loading state
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Adding...');
 
         try {
           const response = await fetch("api/cart.php", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
             body: JSON.stringify({
               action: "add",
               product_id: productId,
@@ -1312,20 +1419,67 @@ class StyleMeRAGSearch {
             }),
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
           const data = await response.json();
 
           if (data.success) {
-            $(this)
+            $btn
               .html('<i class="fas fa-check"></i> Added!')
               .addClass("btn-success")
               .removeClass("btn-primary");
-            updateCartCount();
+            
+            // Update cart count if function exists
+            if (typeof updateCartCount === 'function') {
+              updateCartCount();
+            }
+            
+            // Show success message
+            if (typeof showToast === 'function') {
+              showToast('Product added to cart successfully!', 'success');
+            }
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              $btn
+                .removeClass("btn-success")
+                .addClass("btn-primary")
+                .html(originalHtml)
+                .prop('disabled', false);
+            }, 2000);
+            
           } else {
-            alert("Error adding to cart: " + data.error);
+            // Handle specific error cases
+            if (data.redirect) {
+              if (typeof showToast === 'function') {
+                showToast('Please login to add items to cart', 'error');
+              } else {
+                alert('Please login to add items to cart');
+              }
+              setTimeout(() => {
+                window.location.href = 'login.html';
+              }, 1500);
+            } else {
+              const errorMsg = data.message || "Error adding to cart";
+              if (typeof showToast === 'function') {
+                showToast(errorMsg, 'error');
+              } else {
+                alert(errorMsg);
+              }
+            }
+            $btn.html(originalHtml).prop('disabled', false);
           }
         } catch (error) {
           console.error("Cart error:", error);
-          alert("Error adding to cart");
+          const errorMsg = `Error adding to cart: ${error.message}`;
+          if (typeof showToast === 'function') {
+            showToast(errorMsg, 'error');
+          } else {
+            alert(errorMsg);
+          }
+          $btn.html(originalHtml).prop('disabled', false);
         }
       });
 
@@ -1434,45 +1588,48 @@ class StyleMeRAGSearch {
 let ragSearch;
 $(document).ready(function () {
   console.log("🔄 Document ready, initializing StyleMeRAGSearch...");
-  
+
   try {
     ragSearch = new StyleMeRAGSearch();
     console.log("🚀 StyleMeRAGSearch initialized successfully");
-    
+
     // Force a test to see if our code is running
     console.log("🧪 Testing search functionality...");
-    
+
     // Override any existing search handlers
     setTimeout(() => {
       console.log("🔍 Setting up search override...");
-      
+
       // Remove any existing handlers and add ours
-      $("#intelligentSearchInput").off('input keyup').on('input', function() {
-        const query = $(this).val().trim();
-        console.log("🎯 Search input detected:", query);
-        if (query.length > 2) {
-          console.log("🚀 Triggering RAG search...");
-          ragSearch.performIntelligentSearch(query);
-        } else if (query.length === 0) {
-          // Clear results when search is empty
-          $("#productList").empty();
-          console.log("🧹 Search cleared");
-        }
-      });
-      
+      $("#intelligentSearchInput")
+        .off("input keyup")
+        .on("input", function () {
+          const query = $(this).val().trim();
+          console.log("🎯 Search input detected:", query);
+          if (query.length > 2) {
+            console.log("🚀 Triggering RAG search...");
+            ragSearch.performIntelligentSearch(query);
+          } else if (query.length === 0) {
+            // Clear results when search is empty
+            $("#productList").empty();
+            console.log("🧹 Search cleared");
+          }
+        });
+
       // Also ensure the search button works
-      $("#intelligentSearchBtn").off('click').on('click', function(e) {
-        e.preventDefault();
-        const query = $("#intelligentSearchInput").val().trim();
-        if (query.length > 0) {
-          console.log("🔘 Search button clicked, query:", query);
-          ragSearch.performIntelligentSearch(query);
-        }
-      });
-      
+      $("#intelligentSearchBtn")
+        .off("click")
+        .on("click", function (e) {
+          e.preventDefault();
+          const query = $("#intelligentSearchInput").val().trim();
+          if (query.length > 0) {
+            console.log("🔘 Search button clicked, query:", query);
+            ragSearch.performIntelligentSearch(query);
+          }
+        });
+
       console.log("✅ Search handlers configured successfully");
     }, 1000);
-    
   } catch (error) {
     console.error("❌ Failed to initialize StyleMeRAGSearch:", error);
   }

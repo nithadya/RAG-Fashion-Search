@@ -19,7 +19,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         $action = $input['action'] ?? '';
-        
+
         switch ($action) {
             case 'get_by_ids':
                 $productIds = $input['product_ids'] ?? [];
@@ -33,39 +33,43 @@ try {
         $action = $_GET['action'] ?? '';
 
         switch ($action) {
-        case 'get_categories':
-            $response = getCategories();
-            break;
+            case 'get_categories':
+                $response = getCategories();
+                break;
 
-        case 'featured_categories':
-            $response = getFeaturedCategories();
-            break;
+            case 'featured_categories':
+                $response = getFeaturedCategories();
+                break;
 
-        case 'trending':
-            $response = getTrendingProducts();
-            break;
+            case 'trending':
+                $response = getTrendingProducts();
+                break;
 
-        case 'discounted':
-            $response = getDiscountedProducts();
-            break;
+            case 'discounted':
+                $response = getDiscountedProducts();
+                break;
 
-        case 'filter_options':
-            $response = getFilterOptions();
-            break;
+            case 'filter_options':
+                $response = getFilterOptions();
+                break;
 
-        case 'detail':
-            $productId = intval($_GET['id'] ?? 0);
-            $response = getProductDetail($productId);
-            break;
+            case 'detail':
+                $productId = intval($_GET['id'] ?? 0);
+                $response = getProductDetail($productId);
+                break;
 
-        case 'related':
-            $productId = intval($_GET['id'] ?? 0);
-            $response = getRelatedProducts($productId);
-            break;
+            case 'related':
+                $productId = intval($_GET['id'] ?? 0);
+                $response = getRelatedProducts($productId);
+                break;
 
-        case 'ids':
-            $response = getProductsByIds();
-            break;
+            case 'refresh_rag':
+                $response = refreshRAGVectorStore();
+                break;
+
+            case 'ids':
+                $response = getProductsByIds();
+                break;
 
             case 'search':
             default:
@@ -310,7 +314,7 @@ function getProducts()
         }
 
         // === User Preference Filters ===
-        
+
         // Budget range from preferences
         if (!empty($_GET['budget_min'])) {
             $where[] = "COALESCE(p.discount_price, p.price) >= ?";
@@ -606,6 +610,58 @@ function getProductsByIds($productIds = null)
             'message' => 'Failed to fetch products by IDs',
             'products' => [],
             'total' => 0
+        ];
+    }
+}
+
+function refreshRAGVectorStore() {
+    try {
+        $ragServiceUrl = 'http://localhost:5000';
+        $endpoint = '/vector-store/refresh';
+        
+        // Use cURL to call the RAG service refresh endpoint
+        $ch = curl_init($ragServiceUrl . $endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Allow 60 seconds for refresh
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([]));
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+        
+        if ($curlError) {
+            return [
+                'success' => false,
+                'message' => 'Failed to connect to RAG service: ' . $curlError
+            ];
+        }
+        
+        if ($httpCode === 200) {
+            $ragResponse = json_decode($response, true);
+            return [
+                'success' => true,
+                'message' => 'RAG vector store refreshed successfully',
+                'rag_response' => $ragResponse
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => "RAG service returned HTTP $httpCode",
+                'response' => $response
+            ];
+        }
+        
+    } catch (Exception $e) {
+        error_log("RAG vector store refresh error: " . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Failed to refresh RAG vector store: ' . $e->getMessage()
         ];
     }
 }

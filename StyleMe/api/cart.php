@@ -17,19 +17,34 @@ $response = ['success' => false, 'message' => 'Invalid request'];
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $action = $_POST['action'] ?? '';
+        // Handle both form data and JSON data
+        $input_data = null;
+        $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+        
+        if (strpos($content_type, 'application/json') !== false) {
+            // Handle JSON input
+            $json_input = json_decode(file_get_contents('php://input'), true);
+            if ($json_input) {
+                $input_data = $json_input;
+            }
+        } else {
+            // Handle form data
+            $input_data = $_POST;
+        }
+        
+        $action = $input_data['action'] ?? '';
         
         switch ($action) {
             case 'add':
-                $response = addToCart();
+                $response = addToCart($input_data);
                 break;
                 
             case 'update':
-                $response = updateCartItem();
+                $response = updateCartItem($input_data);
                 break;
                 
             case 'remove':
-                $response = removeCartItem();
+                $response = removeCartItem($input_data);
                 break;
                 
             default:
@@ -63,8 +78,13 @@ try {
 
 echo json_encode($response);
 
-function addToCart() {
+function addToCart($input_data = null) {
     global $db;
+    
+    // Use passed data or fallback to $_POST for backward compatibility
+    if ($input_data === null) {
+        $input_data = $_POST;
+    }
     
     if (!isset($_SESSION['user_id'])) {
         return [
@@ -75,10 +95,10 @@ function addToCart() {
     }
     
     $userId = $_SESSION['user_id'];
-    $productId = intval($_POST['product_id'] ?? 0);
-    $quantity = intval($_POST['quantity'] ?? 1);
-    $size = trim($_POST['size'] ?? '');
-    $color = trim($_POST['color'] ?? '');
+    $productId = intval($input_data['product_id'] ?? 0);
+    $quantity = intval($input_data['quantity'] ?? 1);
+    $size = trim($input_data['size'] ?? '');
+    $color = trim($input_data['color'] ?? '');
     
     if ($productId <= 0 || $quantity <= 0) {
         return ['success' => false, 'message' => 'Invalid product or quantity'];
@@ -127,16 +147,21 @@ function addToCart() {
     }
 }
 
-function updateCartItem() {
+function updateCartItem($input_data = null) {
     global $db;
+    
+    // Use passed data or fallback to $_POST for backward compatibility
+    if ($input_data === null) {
+        $input_data = $_POST;
+    }
     
     if (!isset($_SESSION['user_id'])) {
         return ['success' => false, 'message' => 'Please login first'];
     }
     
     $userId = $_SESSION['user_id'];
-    $cartItemId = intval($_POST['cart_item_id'] ?? 0);
-    $quantity = intval($_POST['quantity'] ?? 1);
+    $cartItemId = intval($input_data['cart_item_id'] ?? 0);
+    $quantity = intval($input_data['quantity'] ?? 1);
     
     if ($cartItemId <= 0 || $quantity <= 0) {
         return ['success' => false, 'message' => 'Invalid item or quantity'];
@@ -173,15 +198,20 @@ function updateCartItem() {
     }
 }
 
-function removeCartItem() {
+function removeCartItem($input_data = null) {
     global $db;
+    
+    // Use passed data or fallback to $_POST for backward compatibility
+    if ($input_data === null) {
+        $input_data = $_POST;
+    }
     
     if (!isset($_SESSION['user_id'])) {
         return ['success' => false, 'message' => 'Please login first'];
     }
     
     $userId = $_SESSION['user_id'];
-    $cartItemId = intval($_POST['cart_item_id'] ?? 0);
+    $cartItemId = intval($input_data['cart_item_id'] ?? 0);
     
     if ($cartItemId <= 0) {
         return ['success' => false, 'message' => 'Invalid item ID'];

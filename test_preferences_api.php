@@ -27,4 +27,3 @@ curl_close($ch);
 echo "HTTP Code: " . $httpCode . "\n";
 echo "Response: " . $response . "\n";
 echo "Is valid JSON: " . (json_decode($response) ? "Yes" : "No") . "\n";
-?>

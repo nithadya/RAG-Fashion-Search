@@ -637,3 +637,157 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Export for global access
 window.ragSearch = ragSearch;
+
+/**
+ * Global functions for RAG search product interactions
+ */
+
+// Global function to add product to cart from RAG search results
+function addToCart(productId, quantity = 1) {
+  if (!productId) {
+    showToast('Invalid product ID', 'error');
+    return;
+  }
+
+  // Find the button that was clicked to show loading state
+  const button = event?.target || document.querySelector(`button[onclick*="addToCart(${productId})"]`);
+  const originalHtml = button?.innerHTML || '';
+  
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+  }
+
+  $.ajax({
+    url: 'api/cart.php',
+    type: 'POST',
+    dataType: 'json',
+    data: { 
+      action: 'add', 
+      product_id: productId,
+      quantity: quantity
+    },
+    success: function(response) {
+      if (response.success) {
+        updateCartCount();
+        if (button) {
+          button.classList.remove('btn-primary');
+          button.classList.add('btn-success');
+          button.innerHTML = '<i class="fas fa-check"></i> Added!';
+        }
+        showToast('Product added to cart successfully!', 'success');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          if (button) {
+            button.classList.remove('btn-success');
+            button.classList.add('btn-primary');
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+          }
+        }, 2000);
+      } else {
+        showToast(response.message || 'Please login to add items to cart', 'error');
+        if (response.redirect) {
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        }
+        if (button) {
+          button.innerHTML = originalHtml;
+          button.disabled = false;
+        }
+      }
+    },
+    error: function() {
+      showToast('Failed to add product to cart. Please try again.', 'error');
+      if (button) {
+        button.innerHTML = originalHtml;
+        button.disabled = false;
+      }
+    }
+  });
+}
+
+// Global function to view product details from RAG search results
+function viewProduct(productId) {
+  if (!productId) {
+    showToast('Invalid product ID', 'error');
+    return;
+  }
+  
+  // Redirect to product detail page
+  window.location.href = `product-detail.html?id=${productId}`;
+}
+
+// Helper function to update cart count (if not already defined)
+function updateCartCount() {
+  if (typeof window.updateCartCount === 'function') {
+    window.updateCartCount();
+    return;
+  }
+
+  // Fallback implementation
+  $.ajax({
+    url: 'api/cart.php?action=count',
+    type: 'GET',
+    dataType: 'json',
+    success: function(response) {
+      if (response.success) {
+        const cartCount = response.count || 0;
+        $('.cart-count, #cartCount').text(cartCount);
+        
+        // Update badge visibility
+        if (cartCount > 0) {
+          $('.cart-count, #cartCount').show();
+        } else {
+          $('.cart-count, #cartCount').hide();
+        }
+      }
+    },
+    error: function() {
+      console.error('Failed to update cart count');
+    }
+  });
+}
+
+// Helper function to show toast notifications (if not already defined)
+function showToast(message, type = 'info') {
+  if (typeof window.showToast === 'function') {
+    window.showToast(message, type);
+    return;
+  }
+
+  // Fallback implementation
+  console.log(`Toast (${type}): ${message}`);
+  
+  // Create a simple toast notification
+  const toast = document.createElement('div');
+  toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} toast-notification`;
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    padding: 15px;
+    border-radius: 5px;
+    animation: slideInRight 0.3s ease-out;
+  `;
+  toast.innerHTML = `
+    <div class="d-flex align-items-center">
+      <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+      <span>${message}</span>
+      <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.remove();
+    }
+  }, 5000);
+}

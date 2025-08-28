@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Vector Store Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .status-card { border-left: 4px solid #007bff; }
+        .status-success { border-left-color: #28a745; }
+        .status-warning { border-left-color: #ffc107; }
+        .status-danger { border-left-color: #dc3545; }
+        .log-output { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-radius: 0.25rem; 
+            padding: 1rem; 
+            font-family: monospace; 
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-brain text-primary"></i> RAG Vector Store Management
+                </h1>
+                <p class="text-muted">
+                    Manage your RAG system's vector store. Use this when you add new products to ensure they appear in search results.
+                </p>
+            </div>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card status-card" id="ragServiceCard">
+                    <div class="card-body">
+                        <h6><i class="fas fa-server"></i> RAG Service</h6>
+                        <p id="ragServiceStatus" class="mb-0">Checking...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card status-card" id="vectorStoreCard">
+                    <div class="card-body">
+                        <h6><i class="fas fa-database"></i> Vector Store</h6>
+                        <p id="vectorStoreStatus" class="mb-0">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card status-card" id="productsCard">
+                    <div class="card-body">
+                        <h6><i class="fas fa-shopping-bag"></i> Products</h6>
+                        <p id="productsStatus" class="mb-0">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Actions -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-sync-alt"></i> Refresh Vector Store</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            Refresh the vector store to include newly added products in RAG search results.
+                        </p>
+                        <button class="btn btn-primary btn-lg" onclick="refreshVectorStore()">
+                            <i class="fas fa-sync-alt"></i> Refresh Now
+                        </button>
+                        <div id="refreshResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-search"></i> Test Search</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            Test if your new products appear in RAG search results.
+                        </p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="testQuery" 
+                                   placeholder="Enter search query..." value="new product">
+                            <button class="btn btn-success" onclick="testRAGSearch()">
+                                <i class="fas fa-search"></i> Test
+                            </button>
+                        </div>
+                        <div id="searchResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-terminal"></i> System Logs</h5>
+                        <button class="btn btn-sm btn-outline-secondary float-end" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="systemLogs" class="log-output">
+                            System ready. Waiting for actions...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Initialize on page load
+        $(document).ready(function() {
+            checkSystemStatus();
+        });
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('systemLogs');
+            const iconClass = type === 'error' ? 'fa-exclamation-circle text-danger' : 
+                             type === 'success' ? 'fa-check-circle text-success' : 
+                             type === 'warning' ? 'fa-exclamation-triangle text-warning' : 
+                             'fa-info-circle text-primary';
+            
+            logDiv.innerHTML += `
+                <div class="mb-1">
+                    <span class="text-muted">[${timestamp}]</span> 
+                    <i class="fas ${iconClass}"></i> 
+                    ${message}
+                </div>
+            `;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('systemLogs').innerHTML = 'Logs cleared.';
+        }
+
+        async function checkSystemStatus() {
+            log('Checking system status...');
+            
+            // Check RAG Service
+            try {
+                const ragResponse = await fetch('http://localhost:5000/');
+                if (ragResponse.ok) {
+                    const ragData = await ragResponse.json();
+                    updateStatusCard('ragServiceCard', 'success', `✅ Online (${ragData.version || 'Unknown'})`);
+                    log('RAG service is online', 'success');
+                } else {
+                    updateStatusCard('ragServiceCard', 'danger', '❌ Service Error');
+                    log('RAG service returned error', 'error');
+                }
+            } catch (error) {
+                updateStatusCard('ragServiceCard', 'danger', '❌ Offline');
+                log('RAG service is offline: ' + error.message, 'error');
+            }
+
+            // Check Vector Store Stats
+            try {
+                const vectorResponse = await fetch('http://localhost:5000/vector-store/stats');
+                if (vectorResponse.ok) {
+                    const vectorData = await vectorResponse.json();
+                    updateStatusCard('vectorStoreCard', 'success', `✅ ${vectorData.total_vectors || 0} vectors`);
+                    log(`Vector store contains ${vectorData.total_vectors || 0} products`, 'success');
+                } else {
+                    updateStatusCard('vectorStoreCard', 'warning', '⚠️ Stats unavailable');
+                    log('Vector store stats unavailable', 'warning');
+                }
+            } catch (error) {
+                updateStatusCard('vectorStoreCard', 'danger', '❌ Error');
+                log('Vector store error: ' + error.message, 'error');
+            }
+
+            // Check Products Count
+            try {
+                const productsResponse = await fetch('api/products.php');
+                if (productsResponse.ok) {
+                    const productsData = await productsResponse.json();
+                    const count = productsData.length || 0;
+                    updateStatusCard('productsCard', 'success', `✅ ${count} products`);
+                    log(`Database contains ${count} products`, 'success');
+                }
+            } catch (error) {
+                updateStatusCard('productsCard', 'warning', '⚠️ Count unavailable');
+                log('Products count error: ' + error.message, 'warning');
+            }
+        }
+
+        function updateStatusCard(cardId, status, message) {
+            const card = document.getElementById(cardId);
+            const statusElement = card.querySelector('p');
+            
+            // Remove existing status classes
+            card.classList.remove('status-success', 'status-warning', 'status-danger');
+            
+            // Add new status class
+            card.classList.add(`status-${status}`);
+            statusElement.textContent = message;
+        }
+
+        async function refreshVectorStore() {
+            const button = event.target;
+            const resultDiv = document.getElementById('refreshResult');
+            const originalHtml = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            resultDiv.innerHTML = '';
+            
+            log('Starting vector store refresh...', 'info');
+
+            try {
+                const response = await fetch('api/products.php?action=refresh_rag', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Success!</h6>
+                            <p>${data.message}</p>
+                            ${data.rag_response ? `<small>Vectors: ${data.rag_response.total_vectors || 'Unknown'}</small>` : ''}
+                        </div>
+                    `;
+                    log('Vector store refreshed successfully!', 'success');
+                    
+                    // Refresh status
+                    setTimeout(checkSystemStatus, 1000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>❌ Failed</h6>
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                    log('Vector store refresh failed: ' + data.message, 'error');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Error</h6>
+                        <p>Failed to refresh: ${error.message}</p>
+                    </div>
+                `;
+                log('Vector store refresh error: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
+            }
+        }
+
+        async function testRAGSearch() {
+            const query = document.getElementById('testQuery').value.trim();
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (!query) {
+                resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a search query</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+            log(`Testing RAG search with query: "${query}"`, 'info');
+
+            try {
+                const response = await fetch('api/rag_search.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        user_id: 0,
+                        search_type: 'auto'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.results && data.results.length > 0) {
+                    const productList = data.results.map(product => 
+                        `<li><strong>${product.name}</strong> (ID: ${product.id}) - ${product.category_name || 'No category'}</li>`
+                    ).join('');
+                    
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ Found ${data.results.length} products</h6>
+                            <ul class="mb-0">${productList}</ul>
+                        </div>
+                    `;
+                    log(`RAG search found ${data.results.length} products`, 'success');
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h6>⚠️ No results found</h6>
+                            <p>The search didn't return any products. Try refreshing the vector store or using different keywords.</p>
+                        </div>
+                    `;
+                    log('RAG search returned no results', 'warning');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>❌ Search failed</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                log('RAG search failed: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

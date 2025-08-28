@@ -297,30 +297,47 @@
             const $submitBtn = $form.find('button[type="submit"]');
             const originalBtnText = $submitBtn.text();
             
-            $submitBtn.html('<span class="spinner me-2"></span>Sending...').prop('disabled', true);
+            // Add spinner and disable button
+            $submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...').prop('disabled', true);
             
             const formData = {
                 name: $('#name').val(),
                 email: $('#email').val(),
                 subject: $('#subject').val(),
-                message: $('#message').val()
+                message: $('#message').val(),
+                type: 'contact'
             };
             
             $.ajax({
-                url: 'api/contact.php',
+                url: 'api/feedback.php',
                 type: 'POST',
                 dataType: 'json',
                 data: formData,
                 success: function(response) {
                     if (response.success) {
-                        showToast('Message sent successfully!', 'success');
+                        showToast(response.message || 'Message sent successfully!', 'success');
                         $form[0].reset();
+                        
+                        // Show success animation
+                        $form.addClass('form-success');
+                        setTimeout(() => {
+                            $form.removeClass('form-success');
+                        }, 3000);
                     } else {
                         showToast(response.message || 'Failed to send message. Please try again.', 'error');
                     }
                 },
-                error: function() {
-                    showToast('Network error. Please try again.', 'error');
+                error: function(xhr, status, error) {
+                    console.error('Contact form error:', xhr.responseText);
+                    let errorMessage = 'Network error. Please try again.';
+                    
+                    if (xhr.status === 500) {
+                        errorMessage = 'Server error. Please try again later.';
+                    } else if (xhr.status === 0) {
+                        errorMessage = 'Connection failed. Please check your internet connection.';
+                    }
+                    
+                    showToast(errorMessage, 'error');
                 },
                 complete: function() {
                     $submitBtn.html(originalBtnText).prop('disabled', false);

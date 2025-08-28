@@ -19,4 +19,3 @@ echo $headers;
 echo "\nBody:\n";
 echo $body;
 echo "\nBody length: " . strlen($body);
-?>

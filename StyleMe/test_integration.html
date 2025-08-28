@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Search + Cart Integration Test</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Enhanced RAG Search CSS -->
+    <link rel="stylesheet" href="assets/css/enhanced-rag-search.css">
+    
+    <style>
+        .test-container { margin: 20px 0; }
+        .cart-indicator { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 1000;
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .search-results { margin-top: 30px; }
+        .status-indicator { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .status-success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .status-error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .status-info { background: #d1ecf1; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <!-- Cart Count Indicator -->
+    <div class="cart-indicator">
+        <i class="fas fa-shopping-cart"></i>
+        Cart: <span id="cartCount">0</span>
+    </div>
+
+    <div class="container">
+        <h1 class="text-center mb-4">RAG Search + Cart Integration Test</h1>
+        
+        <!-- Test Status -->
+        <div id="testStatus"></div>
+        
+        <!-- Categories Test -->
+        <div class="test-container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>1. Categories Test</h3>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary" onclick="testCategories()">Load Categories</button>
+                    <div id="categoriesResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAG Search Test -->
+        <div class="test-container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>2. RAG Search Test</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="searchQuery" placeholder="Try: 'red t-shirt', 'casual wear', 'sportswear'" value="red t-shirt">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-success w-100" onclick="testRAGSearch()">
+                                <i class="fas fa-magic"></i> RAG Search
+                            </button>
+                        </div>
+                    </div>
+                    <div id="ragResults" class="search-results"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Test -->
+        <div class="test-container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>3. Cart Functionality Test</h3>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-info" onclick="testAddToCart(1)">Add Product ID 1 to Cart</button>
+                    <button class="btn btn-secondary" onclick="viewCart()">View Cart Items</button>
+                    <div id="cartResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Enhanced RAG Search JS -->
+    <script src="assets/js/enhanced-rag-search.js"></script>
+
+    <script>
+        // Test status tracking
+        let testResults = {
+            categories: false,
+            rag: false,
+            cart: false
+        };
+
+        function updateTestStatus() {
+            const statusDiv = document.getElementById('testStatus');
+            const allPassed = Object.values(testResults).every(result => result);
+            
+            statusDiv.innerHTML = `
+                <div class="status-indicator ${allPassed ? 'status-success' : 'status-info'}">
+                    <h4>Test Status:</h4>
+                    <ul class="mb-0">
+                        <li>Categories: ${testResults.categories ? '✅ PASS' : '❌ PENDING'}</li>
+                        <li>RAG Search: ${testResults.rag ? '✅ PASS' : '❌ PENDING'}</li>
+                        <li>Cart Integration: ${testResults.cart ? '✅ PASS' : '❌ PENDING'}</li>
+                    </ul>
+                    ${allPassed ? '<p class="mt-2 mb-0"><strong>🎉 All tests passed! Your RAG + Cart integration is working!</strong></p>' : ''}
+                </div>
+            `;
+        }
+
+        function testCategories() {
+            $('#categoriesResult').html('<p><i class="fas fa-spinner fa-spin"></i> Loading categories...</p>');
+            
+            $.ajax({
+                url: 'api/products.php?action=get_categories',
+                type: 'GET',
+                dataType: 'json',
+                success: function(categories) {
+                    if (Array.isArray(categories) && categories.length > 0) {
+                        testResults.categories = true;
+                        $('#categoriesResult').html(`
+                            <div class="alert alert-success">
+                                <h5>✅ Categories loaded successfully!</h5>
+                                <p>Found ${categories.length} categories:</p>
+                                <ul>
+                                    ${categories.map(cat => `<li>${cat.name} (ID: ${cat.id})</li>`).join('')}
+                                </ul>
+                            </div>
+                        `);
+                    } else {
+                        $('#categoriesResult').html(`
+                            <div class="alert alert-warning">
+                                ⚠️ Categories API returned empty or invalid data
+                                <pre>${JSON.stringify(categories, null, 2)}</pre>
+                            </div>
+                        `);
+                    }
+                    updateTestStatus();
+                },
+                error: function(xhr, status, error) {
+                    $('#categoriesResult').html(`
+                        <div class="alert alert-danger">
+                            <h5>❌ Categories test failed</h5>
+                            <p>Status: ${status}</p>
+                            <p>Error: ${error}</p>
+                        </div>
+                    `);
+                    updateTestStatus();
+                }
+            });
+        }
+
+        function testRAGSearch() {
+            const query = $('#searchQuery').val();
+            if (!query) {
+                showToast('Please enter a search query', 'warning');
+                return;
+            }
+
+            $('#ragResults').html('<p><i class="fas fa-spinner fa-spin"></i> Searching with RAG...</p>');
+
+            $.ajax({
+                url: 'api/rag_search.php',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    query: query,
+                    user_id: 0,
+                    search_type: 'auto'
+                }),
+                success: function(response) {
+                    if (response.success && response.results && response.results.length > 0) {
+                        testResults.rag = true;
+                        displayRAGResults(response.results);
+                        showToast(`Found ${response.results.length} products!`, 'success');
+                    } else {
+                        $('#ragResults').html(`
+                            <div class="alert alert-warning">
+                                ⚠️ RAG search returned no results
+                                <pre>${JSON.stringify(response, null, 2)}</pre>
+                            </div>
+                        `);
+                    }
+                    updateTestStatus();
+                },
+                error: function(xhr, status, error) {
+                    $('#ragResults').html(`
+                        <div class="alert alert-danger">
+                            <h5>❌ RAG search failed</h5>
+                            <p>Status: ${status}</p>
+                            <p>Error: ${error}</p>
+                            <p>Make sure your RAG service is running on port 5000</p>
+                        </div>
+                    `);
+                    updateTestStatus();
+                }
+            });
+        }
+
+        function displayRAGResults(products) {
+            const resultsHtml = products.map(product => `
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <img src="assets/uploads/${product.image || 'placeholder-product.jpg'}" 
+                             class="card-img-top" style="height: 200px; object-fit: cover;" 
+                             alt="${product.name}">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">${product.name}</h6>
+                            <p class="card-text text-muted small">${product.category_name || ''}</p>
+                            <div class="mb-2">
+                                ${product.discount_price > 0 ? 
+                                    `<span class="text-success fw-bold">Rs. ${product.discount_price}</span>
+                                     <span class="text-muted text-decoration-line-through ms-2">Rs. ${product.price}</span>` :
+                                    `<span class="text-primary fw-bold">Rs. ${product.price}</span>`
+                                }
+                            </div>
+                            <div class="mt-auto">
+                                <button class="btn btn-primary btn-sm me-2" onclick="addToCart(${product.id})">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="viewProduct(${product.id})">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            $('#ragResults').html(`
+                <div class="alert alert-success">
+                    <h5>✅ RAG Search successful!</h5>
+                    <p>Found ${products.length} matching products. Try adding them to cart:</p>
+                </div>
+                <div class="row">${resultsHtml}</div>
+            `);
+        }
+
+        function testAddToCart(productId) {
+            addToCart(productId);
+            testResults.cart = true;
+            updateTestStatus();
+        }
+
+        function viewCart() {
+            $('#cartResult').html('<p><i class="fas fa-spinner fa-spin"></i> Loading cart...</p>');
+            
+            $.ajax({
+                url: 'api/cart.php?action=get',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const items = response.items || [];
+                        $('#cartResult').html(`
+                            <div class="alert alert-info">
+                                <h5>Cart Contents (${items.length} items):</h5>
+                                ${items.length > 0 ? 
+                                    `<ul>
+                                        ${items.map(item => 
+                                            `<li>${item.product_name} - Qty: ${item.quantity} - Rs. ${item.total_price}</li>`
+                                        ).join('')}
+                                    </ul>` :
+                                    '<p>Cart is empty</p>'
+                                }
+                            </div>
+                        `);
+                    }
+                },
+                error: function() {
+                    $('#cartResult').html('<div class="alert alert-danger">Failed to load cart</div>');
+                }
+            });
+        }
+
+        // Global utility functions
+        function updateCartCount() {
+            $.ajax({
+                url: 'api/cart.php?action=count',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const cartCount = response.count || 0;
+                        $('#cartCount').text(cartCount);
+                    }
+                }
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            // Simple toast implementation
+            const toast = $(`
+                <div class="alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show" 
+                     style="position: fixed; top: 70px; right: 20px; z-index: 1050; min-width: 300px;">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            
+            $('body').append(toast);
+            
+            setTimeout(() => {
+                toast.alert('close');
+            }, 5000);
+        }
+
+        // Initialize on page load
+        $(document).ready(function() {
+            updateTestStatus();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

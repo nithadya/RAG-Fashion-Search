@@ -23,4 +23,3 @@ if ($output) {
         print_r($decoded);
     }
 }
-?>
